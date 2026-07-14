@@ -1,0 +1,271 @@
+/* ========== 基础样式重置与全局设置 ========== */
+
+/* 全局盒模型重置 */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ========== 根元素与正文 ========== */
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  /* 正文字体 - Geist 无衬线 */
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-normal);
+  color: var(--color-text);
+  background-color: var(--color-bg);
+
+  /* 极淡的径向渐变叠加 - 营造材质感与空间层次 */
+  background-image:
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.03) 0px, transparent 50%),
+    radial-gradient(at 98% 1%, rgba(245, 158, 11, 0.02) 0px, transparent 50%);
+  background-attachment: fixed;
+
+  /* 字体渲染优化 */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+
+  /* 字体特性 - 启用等宽数字变体 */
+  font-feature-settings: 'cv11', 'ss01';
+  font-variant-ligatures: common-ligatures;
+
+  /* 主题切换过渡 - 避免闪烁 */
+  transition: background-color var(--duration-normal) var(--ease-out),
+              color var(--duration-normal) var(--ease-out);
+}
+
+#app {
+  height: 100%;
+  min-height: 100%;
+}
+
+/* ========== 全局排版 ========== */
+
+/* 标题 - 使用 Instrument Serif 衬线字体 */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  font-weight: var(--weight-normal);
+  line-height: var(--leading-tight);
+  color: var(--color-text);
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: var(--text-4xl);
+}
+
+h2 {
+  font-size: var(--text-3xl);
+}
+
+h3 {
+  font-size: var(--text-2xl);
+}
+
+h4 {
+  font-size: var(--text-xl);
+}
+
+h5 {
+  font-size: var(--text-lg);
+}
+
+h6 {
+  font-size: var(--text-base);
+}
+
+/* 段落与链接 */
+p {
+  line-height: var(--leading-relaxed);
+}
+
+a {
+  color: var(--color-accent);
+  text-decoration: none;
+  transition: color var(--duration-fast) var(--ease-out);
+}
+
+a:hover {
+  color: var(--color-accent-hover);
+}
+
+/* 强调与标记 */
+strong,
+b {
+  font-weight: var(--weight-semibold);
+}
+
+/* 代码 - 使用 Geist Mono 等宽字体 */
+code,
+kbd,
+samp,
+pre {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+/* ========== 数字相关工具类 ========== */
+
+/* 等宽数字 - 用于库存数量、价格等需要对齐的数值 */
+.tabular {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: 'tnum';
+}
+
+/* ========== 表单元素基础 ========== */
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+button {
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+/* 禁用态统一处理 */
+:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* ========== 焦点环 ========== */
+
+/* 仅在键盘导航时显示焦点环 */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* 鼠标点击时不显示焦点环 */
+:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ========== 选中状态 ========== */
+
+::selection {
+  background-color: rgba(var(--color-accent-rgb), 0.2);
+  color: var(--color-text);
+}
+
+/* ========== 滚动条样式 ========== */
+
+/* Webkit 浏览器滚动条 */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border-strong);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--color-text-tertiary);
+  background-clip: content-box;
+}
+
+::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox 滚动条 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+
+/* ========== 图片与媒体 ========== */
+
+img,
+picture,
+video,
+canvas,
+svg {
+  display: block;
+  max-width: 100%;
+}
+
+/* ========== 杂项 ========== */
+
+/* 隐藏元素但不影响无障碍访问 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* 防止表格布局溢出 */
+table {
+  border-collapse: collapse;
+  table-layout: fixed;
+  width: 100%;
+}
+
+/* 列表样式重置 */
+ol,
+ul {
+  list-style: none;
+}
+
+/* 输入框与按钮默认样式去除 */
+input,
+button,
+textarea,
+select {
+  background: none;
+  border: none;
+  outline: none;
+}
+
+/* 移除 IE 默认的清除按钮 */
+input::-ms-clear,
+input::-ms-reveal {
+  display: none;
+}
+
+/* ========== 夜间模式背景渐变 ========== */
+/* 夜间模式下提升叠加透明度，让深色背景上仍能看出微弱氛围光 */
+[data-theme='dark'] body {
+  background-image:
+    radial-gradient(at 0% 0%, rgba(16, 185, 129, 0.04) 0px, transparent 50%),
+    radial-gradient(at 98% 1%, rgba(245, 158, 11, 0.03) 0px, transparent 50%);
+}

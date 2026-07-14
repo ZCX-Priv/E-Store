@@ -1,0 +1,117 @@
+/* ========== 动画系统 ========== */
+
+/* 侧边栏收起/展开 - spring 效果 */
+@keyframes sidebar-expand {
+  from { width: var(--sidebar-collapsed-width); }
+  to { width: var(--sidebar-width); }
+}
+
+/* 模态框进入 - 从触发源缩放展开 */
+@keyframes modal-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+/* 模态框退出 */
+@keyframes modal-exit {
+  from {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.92) translateY(8px);
+  }
+}
+
+/* 卡片进入 - 交错出现 */
+@keyframes card-enter {
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* 抽屉进入 - 从左侧滑入 */
+@keyframes drawer-enter {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(0); }
+}
+
+/* 遮罩进入 */
+@keyframes overlay-enter {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 数值变化高亮 */
+@keyframes value-pulse {
+  0% { background-color: transparent; }
+  50% { background-color: rgba(16, 185, 129, 0.12); }
+  100% { background-color: transparent; }
+}
+
+/* 动画工具类 */
+.animate-modal-enter {
+  animation: modal-enter var(--spring-response) var(--ease-out) forwards;
+}
+.animate-modal-exit {
+  animation: modal-exit var(--duration-fast) var(--ease-in-out) forwards;
+}
+.animate-card-enter {
+  animation: card-enter var(--spring-response) var(--ease-out) backwards;
+}
+.animate-drawer-enter {
+  animation: drawer-enter var(--spring-response) var(--ease-out) forwards;
+}
+.animate-overlay-enter {
+  animation: overlay-enter var(--duration-normal) var(--ease-out) forwards;
+}
+.animate-value-pulse {
+  animation: value-pulse 600ms var(--ease-out);
+}
+
+/* ========== 减少动画偏好 ========== */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* 替换位移/缩放为纯透明度过渡 */
+  .animate-modal-enter,
+  .animate-modal-exit,
+  .animate-card-enter,
+  .animate-drawer-enter {
+    animation-name: overlay-enter !important;
+    transform: none !important;
+  }
+}
+
+/* ========== 减少透明度偏好 ========== */
+@media (prefers-reduced-transparency: reduce) {
+  /* 侧边栏降级：移除毛玻璃，使用不透明背景 */
+  .material-sidebar,
+  .sidebar {
+    background: var(--color-graphite) !important;
+    backdrop-filter: none !important;
+  }
+  /* 顶栏降级：移除毛玻璃，使用不透明背景 */
+  .material-header,
+  .app-header {
+    background: var(--color-bg-elevated) !important;
+    backdrop-filter: none !important;
+  }
+}
