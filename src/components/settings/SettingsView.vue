@@ -162,6 +162,8 @@ const currentThemeIcon = computed<Component>(() => {
 
 function setTheme(mode: ThemeMode) {
   uiStore.setTheme(mode)
+  const label = themeOptions.find((o) => o.value === mode)?.label ?? ''
+  toast.info(`已切换主题：${label}`)
 }
 
 // ========== 返回库存页 ==========

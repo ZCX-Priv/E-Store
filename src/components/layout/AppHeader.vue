@@ -5,6 +5,7 @@ import type { Component } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useCategories } from '@/composables/useCategories'
+import { useToast } from '@/composables/useToast'
 import { SPECIAL_CATEGORIES } from '@/db'
 import { Menu, LayoutGrid, List, Plus, Package, Settings, Layers, PackageOpen, Folder } from 'lucide-vue-next'
 import type { ViewMode } from '@/db'
@@ -12,6 +13,7 @@ import type { ViewMode } from '@/db'
 const uiStore = useUiStore()
 const { isMobile } = useBreakpoint()
 const { categories } = useCategories()
+const toast = useToast()
 
 // 当前 brand 显示：根据 currentView 与 selectedCategoryId 决定图标 + 名称
 // - 设置页 → Settings + "设置"
@@ -40,7 +42,9 @@ const currentBrand = computed<{ icon: Component; name: string }>(() => {
 
 // 切换视图模式
 function switchView(mode: ViewMode) {
+  if (uiStore.viewMode === mode) return
   uiStore.setViewMode(mode)
+  toast.info(mode === 'grid' ? '已切换至网格视图' : '已切换至列表视图')
 }
 </script>
 

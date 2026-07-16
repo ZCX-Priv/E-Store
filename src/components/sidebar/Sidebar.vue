@@ -29,6 +29,12 @@ function handleSelect() {
 function handleAddCategory() {
   categoryListRef.value?.handleAddCategory()
 }
+
+// 切换设置/库存视图，并在移动端收起抽屉（复用 select 事件，桌面端未绑定无副作用）
+function handleSettingsClick() {
+  uiStore.setView(uiStore.currentView === 'settings' ? 'inventory' : 'settings')
+  emit('select')
+}
 </script>
 
 <template>
@@ -75,7 +81,7 @@ function handleAddCategory() {
       <button
         class="settings-btn"
         :class="{ collapsed: isCollapsed, active: uiStore.currentView === 'settings' }"
-        @click="uiStore.setView(uiStore.currentView === 'settings' ? 'inventory' : 'settings')"
+        @click="handleSettingsClick"
         :aria-label="isCollapsed ? '系统设置' : undefined"
       >
         <Settings :size="18" />

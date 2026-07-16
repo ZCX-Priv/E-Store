@@ -26,6 +26,9 @@ const toast = useToast()
 // 正在编辑的分类 id（单一数据源，由 CategoryList 统一管理）
 const editingId = ref<number | null>(null)
 
+// 刚创建、待命名的分类 id：命名会话结束后才提示“已创建”
+const pendingCreateId = ref<number | null>(null)
+
 // 选中分类
 function selectCategory(id: string | number) {
   uiStore.setView('inventory')
@@ -36,12 +39,19 @@ function selectCategory(id: string | number) {
 // 添加分类：创建后自动选中并进入编辑模式
 async function handleAddCategory() {
   const name = `新分类 ${categories.value.length + 1}`
-  const id = await categoryRepo.createCategory(name)
-  // 自动选中新建分类（直接调用 store，不 emit select 事件，避免移动端抽屉关闭）
-  uiStore.setView('inventory')
-  uiStore.selectCategory(id)
-  // 进入编辑模式（CategoryItem 通过 watch 响应 editing 变化）
-  editingId.value = id
+  try {
+    const id = await categoryRepo.createCategory(name)
+    // 自动选中新建分类（直接调用 store，不 emit select 事件，避免移动端抽屉关闭）
+    uiStore.setView('inventory')
+    uiStore.selectCategory(id)
+    // 进入编辑模式（CategoryItem 通过 watch 响应 editing 变化）
+    editingId.value = id
+    // 标记为待命名，命名会话结束后再提示，此处不提示
+    pendingCreateId.value = id
+  } catch (err) {
+    console.error('创建分类失败:', err)
+    toast.error('创建失败，请重试')
+  }
 }
 
 // 进入编辑模式（由 CategoryItem 的 start-edit 事件触发）
@@ -51,9 +61,12 @@ function startEdit(id: number) {
 
 // 重命名分类
 async function handleRename(id: number, name: string) {
+  // 区分“新建后首次命名”与“已有分类重命名”；开头同步清除标记，避免 blur 二次触发重复提示
+  const isNewlyCreated = pendingCreateId.value === id
+  if (isNewlyCreated) pendingCreateId.value = null
   try {
     await categoryRepo.renameCategory(id, name)
-    toast.success('分类已重命名')
+    toast.success(isNewlyCreated ? '已创建分类' : '分类已重命名')
   } catch (err) {
     console.error('重命名失败:', err)
     toast.error('重命名失败')
@@ -63,6 +76,11 @@ async function handleRename(id: number, name: string) {
 
 // 取消编辑
 function cancelEdit() {
+  // 若结束的是新建分类的命名会话（保留默认名或取消），仍确认“已创建”
+  if (pendingCreateId.value !== null) {
+    toast.success('已创建分类')
+    pendingCreateId.value = null
+  }
   editingId.value = null
 }
 

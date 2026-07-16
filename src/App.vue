@@ -4,6 +4,7 @@ import { computed, onMounted, watch } from 'vue'
 import { usePreferredDark } from '@vueuse/core'
 import { useUiStore } from '@/stores/ui'
 import { useBreakpoint } from '@/composables/useBreakpoint'
+import { useToast } from '@/composables/useToast'
 import { categoryRepo } from '@/db'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import Sidebar from '@/components/sidebar/Sidebar.vue'
@@ -12,6 +13,7 @@ import ToastContainer from '@/components/common/ToastContainer.vue'
 
 const uiStore = useUiStore()
 const { isMobile } = useBreakpoint()
+const toast = useToast()
 
 // 系统暗色偏好（响应式，自动监听 prefers-color-scheme 变化）
 const systemPrefersDark = usePreferredDark()
@@ -36,6 +38,11 @@ watch(
 // 应用启动时初始化默认分类
 onMounted(async () => {
   await categoryRepo.migrateUncategorizedCategory()
+  // 首次进入欢迎（持久化，仅显示一次）
+  if (!localStorage.getItem('inventory-welcomed')) {
+    toast.info('欢迎使用 E-Store 库存管理')
+    localStorage.setItem('inventory-welcomed', 'true')
+  }
 })
 </script>
 
