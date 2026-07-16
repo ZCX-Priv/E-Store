@@ -5,6 +5,7 @@ import { VueDraggable } from 'vue-draggable-plus'
 import { useVirtualList } from '@vueuse/core'
 import { useUiStore } from '@/stores/ui'
 import { useItems } from '@/composables/useItems'
+import { useToast } from '@/composables/useToast'
 import { itemRepo } from '@/db'
 import type { Item } from '@/db'
 import ItemCard from './ItemCard.vue'
@@ -15,6 +16,7 @@ import { PackageX } from 'lucide-vue-next'
 
 const uiStore = useUiStore()
 const { items, loading } = useItems()
+const toast = useToast()
 
 // 事件透传（由 Task 8 接管表单）
 const emit = defineEmits<{
@@ -31,7 +33,15 @@ function requestDelete(item: Item) {
 
 async function confirmDelete() {
   if (deletingItem.value?.id) {
-    await itemRepo.deleteItem(deletingItem.value.id)
+    // 先缓存名称，删除后 deletingItem 会置空
+    const name = deletingItem.value.name
+    try {
+      await itemRepo.deleteItem(deletingItem.value.id)
+      toast.success(`已删除「${name}」`)
+    } catch (err) {
+      console.error('删除失败:', err)
+      toast.error('删除失败，请重试')
+    }
   }
   deletingItem.value = null
 }

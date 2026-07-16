@@ -21,6 +21,8 @@
   --color-danger: #ef4444;          /* 朱红 - 缺货/删除 */
   --color-danger-rgb: 239, 68, 68;
   --color-danger-hover: #dc2626;     /* 朱红 hover 态 */
+  --color-info: #3b82f6;            /* 天蓝 - 提示 */
+  --color-info-rgb: 59, 130, 246;
 
   /* 色彩 - 文字 */
   --color-text: #1c1917;            /* 主文字 */
@@ -122,6 +124,7 @@
   --z-modal-overlay: 100;
   --z-modal: 110;
   --z-tooltip: 60;
+  --z-toast: 200;               /* Toast 通知：高于模态框，保证在模态框之上可见 */
 }
 
 /* ========== 夜间模式变量覆盖 ========== */

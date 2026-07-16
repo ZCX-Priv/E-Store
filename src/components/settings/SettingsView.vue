@@ -7,9 +7,11 @@ import { useUiStore } from '@/stores/ui'
 import type { ThemeMode } from '@/stores/ui'
 import { itemRepo, categoryRepo } from '@/db'
 import { exportItemsToExcel, parseExcelFile, type ImportPreview } from '@/utils/excel'
+import { useToast } from '@/composables/useToast'
 import type { Item, Category } from '@/db'
 
 const uiStore = useUiStore()
+const toast = useToast()
 
 // 当前数据快照
 const allItems = ref<Item[]>([])
@@ -23,10 +25,16 @@ onMounted(async () => {
 
 // ========== 导出 ==========
 async function handleExport() {
-  // 导出前重新获取最新数据
-  allItems.value = await itemRepo.getAllItems()
-  allCategories.value = await categoryRepo.getAllCategories()
-  exportItemsToExcel(allItems.value, allCategories.value)
+  try {
+    // 导出前重新获取最新数据
+    allItems.value = await itemRepo.getAllItems()
+    allCategories.value = await categoryRepo.getAllCategories()
+    exportItemsToExcel(allItems.value, allCategories.value)
+    toast.success(`已导出 ${allItems.value.length} 项`)
+  } catch (err) {
+    console.error('导出失败:', err)
+    toast.error('导出失败，请重试')
+  }
 }
 
 // ========== 导入 ==========
@@ -51,10 +59,16 @@ async function handleFileChange(event: Event) {
 
   // 解析 Excel 文件
   try {
-    importPreview.value = await parseExcelFile(file, allItems.value, allCategories.value)
+    const preview = await parseExcelFile(file, allItems.value, allCategories.value)
+    if (preview.total === 0) {
+      // 无可导入数据：提示且不打开预览
+      toast.info('文件中未找到可导入的数据')
+    } else {
+      importPreview.value = preview
+    }
   } catch (err) {
     console.error('解析 Excel 失败:', err)
-    alert('解析 Excel 失败，请检查文件格式')
+    toast.error('解析 Excel 失败，请检查文件格式')
   }
 
   // 重置 input，以便重复选择同一文件
@@ -75,6 +89,9 @@ async function confirmImport() {
       createdAt: now,
       updatedAt: now,
     }))
+
+    // 实际写入（新增+覆盖）条数，用于反馈提示
+    let importedCount = 0
 
     if (importMode.value === 'overwrite' && importPreview.value.conflicts > 0) {
       // 覆盖模式：更新同名项，添加新项
@@ -97,6 +114,7 @@ async function confirmImport() {
       if (toAdd.length > 0) {
         await itemRepo.bulkAddItems(toAdd)
       }
+      importedCount = toUpdate.length + toAdd.length
     } else {
       // 跳过模式：仅添加非冲突项
       const toAdd = itemsToAdd.filter(
@@ -105,12 +123,20 @@ async function confirmImport() {
       if (toAdd.length > 0) {
         await itemRepo.bulkAddItems(toAdd)
       }
+      importedCount = toAdd.length
     }
 
     importPreview.value = null
+
+    // 成功反馈：有写入则提示条数，否则（跳过模式全为同名项）提示未导入
+    if (importedCount > 0) {
+      toast.success(`成功导入 ${importedCount} 项`)
+    } else {
+      toast.info('全部为同名项，未导入任何数据')
+    }
   } catch (err) {
     console.error('导入失败:', err)
-    alert('导入失败，请重试')
+    toast.error('导入失败，请重试')
   } finally {
     importing.value = false
   }

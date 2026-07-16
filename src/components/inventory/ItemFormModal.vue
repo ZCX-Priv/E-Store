@@ -4,6 +4,8 @@ import { ref, watch, computed, nextTick, onMounted, onUnmounted } from 'vue'
 import { X } from 'lucide-vue-next'
 import { itemRepo, categoryRepo } from '@/db'
 import type { Item, Category } from '@/db'
+import { useUiStore } from '@/stores/ui'
+import { useToast } from '@/composables/useToast'
 
 const props = defineProps<{
   show: boolean
@@ -14,6 +16,10 @@ const emit = defineEmits<{
   close: []
   saved: []
 }>()
+
+// UI Store：读取当前所在分类，作为添加模式的默认分类
+const uiStore = useUiStore()
+const toast = useToast()
 
 // 表单数据
 const formData = ref<{
@@ -73,6 +79,17 @@ async function loadCategories() {
   categories.value = await categoryRepo.getAllCategories()
 }
 
+// 添加模式下的默认分类：
+// - 当前在某个具体分类 → 默认该分类
+// - 当前在「全部」/「未分类」→ 默认「未分类」(undefined)
+function getDefaultCategoryId(): number | undefined {
+  const sel = uiStore.selectedCategoryId
+  if (typeof sel === 'number' && categories.value.some((c) => c.id === sel)) {
+    return sel
+  }
+  return undefined
+}
+
 // 监听 show 变化，重置表单并管理焦点
 watch(() => props.show, async (newShow) => {
   if (newShow) {
@@ -92,12 +109,12 @@ watch(() => props.show, async (newShow) => {
         lowStockThreshold: props.editItem.lowStockThreshold ?? 10,
       }
     } else {
-      // 添加模式：重置，默认「不分类」+ 开启预警 + 阈值 10
+      // 添加模式：重置，默认分类跟随当前所在分类 + 开启预警 + 阈值 10
       formData.value = {
         name: '',
         quantity: 0,
         unit: '个',
-        categoryId: undefined,
+        categoryId: getDefaultCategoryId(),
         price: 0,
         description: '',
         lowStockAlertEnabled: true,
@@ -153,10 +170,12 @@ async function handleSave() {
     } else {
       await itemRepo.createItem(data)
     }
+    toast.success(isEdit.value ? '已保存修改' : '添加成功')
     emit('saved')
     emit('close')
   } catch (err) {
     console.error('保存失败:', err)
+    toast.error('保存失败，请重试')
   } finally {
     saving.value = false
   }

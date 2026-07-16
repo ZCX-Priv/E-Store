@@ -125,6 +125,11 @@ function switchView(mode: ViewMode) {
   overflow: hidden;
 }
 
+/* 右侧操作区不参与收缩，避免窄屏时按钮被挤压消失 */
+.header-right {
+  flex-shrink: 0;
+}
+
 .brand {
   display: flex;
   align-items: center;
@@ -216,6 +221,7 @@ function switchView(mode: ViewMode) {
   display: inline-flex;
   align-items: center;
   gap: var(--space-2);
+  flex-shrink: 0;
   padding: var(--space-2) var(--space-4);
   background: var(--color-accent);
   color: white;
@@ -223,6 +229,7 @@ function switchView(mode: ViewMode) {
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);
+  white-space: nowrap;
   cursor: pointer;
   transition: background var(--duration-fast) var(--ease-out),
               transform var(--duration-fast) var(--ease-out);

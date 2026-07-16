@@ -3,6 +3,7 @@
 import { ref } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useCategories, useCategoryCount } from '@/composables/useCategories'
+import { useToast } from '@/composables/useToast'
 import { categoryRepo, itemRepo } from '@/db'
 import { SPECIAL_CATEGORIES } from '@/db'
 import { Layers, PackageOpen, FolderX } from 'lucide-vue-next'
@@ -20,6 +21,7 @@ const emit = defineEmits<{
 const uiStore = useUiStore()
 const { categories, loading } = useCategories()
 const { counts } = useCategoryCount()
+const toast = useToast()
 
 // 正在编辑的分类 id（单一数据源，由 CategoryList 统一管理）
 const editingId = ref<number | null>(null)
@@ -49,7 +51,13 @@ function startEdit(id: number) {
 
 // 重命名分类
 async function handleRename(id: number, name: string) {
-  await categoryRepo.renameCategory(id, name)
+  try {
+    await categoryRepo.renameCategory(id, name)
+    toast.success('分类已重命名')
+  } catch (err) {
+    console.error('重命名失败:', err)
+    toast.error('重命名失败')
+  }
   editingId.value = null
 }
 
@@ -68,10 +76,19 @@ function requestDelete(id: number, name: string) {
 // 确认删除：其下库存项变为无分类（categoryId = undefined）
 async function confirmDelete() {
   if (!deletingCategory.value) return
-  await categoryRepo.deleteCategory(deletingCategory.value.id)
-  // 如果删除的是当前选中的分类，切回「全部」
-  if (uiStore.selectedCategoryId === deletingCategory.value.id) {
-    selectCategory(SPECIAL_CATEGORIES.ALL)
+  const id = deletingCategory.value.id
+  try {
+    await categoryRepo.deleteCategory(id)
+    // 如果删除的是当前选中的分类，切回「全部」
+    // 直接调用 store，不 emit select 事件，避免移动端抽屉被关闭
+    if (uiStore.selectedCategoryId === id) {
+      uiStore.setView('inventory')
+      uiStore.selectCategory(SPECIAL_CATEGORIES.ALL)
+    }
+    toast.success('分类已删除')
+  } catch (err) {
+    console.error('删除分类失败:', err)
+    toast.error('删除失败，请重试')
   }
   deletingCategory.value = null
 }

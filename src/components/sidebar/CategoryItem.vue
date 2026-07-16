@@ -65,7 +65,7 @@ watch(() => props.editing, async (isEditing) => {
     inputRef.value?.focus()
     inputRef.value?.select()
   }
-})
+}, { immediate: true })
 
 // 点击重命名按钮：通知父组件进入编辑模式
 function startEdit() {

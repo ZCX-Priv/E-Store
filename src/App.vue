@@ -8,6 +8,7 @@ import { categoryRepo } from '@/db'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import Sidebar from '@/components/sidebar/Sidebar.vue'
 import MainContent from '@/components/layout/MainContent.vue'
+import ToastContainer from '@/components/common/ToastContainer.vue'
 
 const uiStore = useUiStore()
 const { isMobile } = useBreakpoint()
@@ -68,6 +69,9 @@ onMounted(async () => {
       <AppHeader />
       <MainContent />
     </div>
+
+    <!-- 全局 Toast 通知（Teleport 到 body，放置位置不影响层级） -->
+    <ToastContainer />
   </div>
 </template>
 
