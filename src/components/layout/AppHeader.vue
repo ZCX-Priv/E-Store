@@ -1,12 +1,42 @@
 <script setup lang="ts">
 // 顶栏组件
+import { computed, markRaw } from 'vue'
+import type { Component } from 'vue'
 import { useUiStore } from '@/stores/ui'
 import { useBreakpoint } from '@/composables/useBreakpoint'
-import { Menu, LayoutGrid, List, Plus, Package } from 'lucide-vue-next'
+import { useCategories } from '@/composables/useCategories'
+import { SPECIAL_CATEGORIES } from '@/db'
+import { Menu, LayoutGrid, List, Plus, Package, Settings, Layers, PackageOpen, Folder } from 'lucide-vue-next'
 import type { ViewMode } from '@/db'
 
 const uiStore = useUiStore()
 const { isMobile } = useBreakpoint()
+const { categories } = useCategories()
+
+// 当前 brand 显示：根据 currentView 与 selectedCategoryId 决定图标 + 名称
+// - 设置页 → Settings + "设置"
+// - 全部 → Layers + "全部"
+// - 未分类 → PackageOpen + "未分类"
+// - 动态分类 → Folder + 分类名；找不到时回退 Package + "库存管理"
+const currentBrand = computed<{ icon: Component; name: string }>(() => {
+  if (uiStore.currentView === 'settings') {
+    return { icon: markRaw(Settings), name: '设置' }
+  }
+  const id = uiStore.selectedCategoryId
+  if (id === SPECIAL_CATEGORIES.ALL) {
+    return { icon: markRaw(Layers), name: '全部' }
+  }
+  if (id === SPECIAL_CATEGORIES.UNCATEGORIZED) {
+    return { icon: markRaw(PackageOpen), name: '未分类' }
+  }
+  if (typeof id === 'number') {
+    const cat = categories.value.find((c) => c.id === id)
+    if (cat) {
+      return { icon: markRaw(Folder), name: cat.name }
+    }
+  }
+  return { icon: markRaw(Package), name: '库存管理' }
+})
 
 // 切换视图模式
 function switchView(mode: ViewMode) {
@@ -27,10 +57,10 @@ function switchView(mode: ViewMode) {
         <Menu :size="20" />
       </button>
 
-      <!-- 品牌标识 -->
+      <!-- 品牌标识：显示当前分类图标 + 名称 -->
       <div class="brand">
-        <Package :size="20" class="brand-icon" />
-        <span class="brand-name" v-if="!isMobile">库存管理</span>
+        <component :is="currentBrand.icon" :size="20" class="brand-icon" />
+        <span class="brand-name">{{ currentBrand.name }}</span>
       </div>
     </div>
 
@@ -90,20 +120,33 @@ function switchView(mode: ViewMode) {
   gap: var(--space-3);
 }
 
+.header-left {
+  min-width: 0;
+  overflow: hidden;
+}
+
 .brand {
   display: flex;
   align-items: center;
   gap: var(--space-2);
+  min-width: 0;
+  overflow: hidden;
 }
 
 .brand-icon {
   color: var(--color-accent);
+  flex-shrink: 0;
 }
 
 .brand-name {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-size: var(--text-xl);
+  font-weight: var(--weight-semibold);
   color: var(--color-text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 
 /* 图标按钮 */

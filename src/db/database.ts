@@ -13,8 +13,22 @@ export class InventoryDatabase extends Dexie {
       // 主键 id，order 用于排序，name 用于按名查找
       categories: '++id, order, name',
       // categoryId、order、quantity 建立索引以优化查询
-      // quantity 索引用于低库存统计（belowOrEqual 范围查询）
       items: '++id, categoryId, order, name, quantity',
+    })
+
+    // v2：Item 新增 lowStockAlertEnabled / lowStockThreshold 字段，给历史数据填默认值
+    this.version(2).stores({
+      categories: '++id, order, name',
+      items: '++id, categoryId, order, name, quantity',
+    }).upgrade(async (trans) => {
+      await trans.table('items').toCollection().modify((item) => {
+        if (item.lowStockAlertEnabled === undefined) {
+          item.lowStockAlertEnabled = true
+        }
+        if (item.lowStockThreshold === undefined) {
+          item.lowStockThreshold = 10
+        }
+      })
     })
   }
 }

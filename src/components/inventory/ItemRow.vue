@@ -29,7 +29,9 @@ async function adjustQuantity(delta: number) {
   }, 300)
 }
 
-const isLowStock = () => props.item.quantity <= 10
+// 是否低库存：按该项自身的预警开关与阈值判定
+const isLowStock = () =>
+  props.item.lowStockAlertEnabled && props.item.quantity <= props.item.lowStockThreshold
 
 // 拖拽开始：写入 item id 到 dataTransfer，供侧边栏分类项接收（跨分类移动）
 // 与 vue-draggable-plus 的同分类排序共存，详见 ItemCard 中同样注释

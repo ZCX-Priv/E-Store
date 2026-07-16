@@ -4,7 +4,8 @@ import { from } from 'rxjs'
 import { itemRepo } from '@/db'
 
 // 响应式获取库存统计（总条目数、总价值、低库存数）
-export function useInventoryStats(lowStockThreshold: number = 10) {
+// 低库存判定按每项自身的 lowStockAlertEnabled + lowStockThreshold
+export function useInventoryStats() {
   const totalCount = ref(0)
   const totalValue = ref(0)
   const lowStockCount = ref(0)
@@ -16,7 +17,9 @@ export function useInventoryStats(lowStockThreshold: number = 10) {
       return {
         total: items.length,
         value: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
-        lowStock: items.filter((i) => i.quantity <= lowStockThreshold).length,
+        lowStock: items.filter(
+          (i) => i.lowStockAlertEnabled && i.quantity <= i.lowStockThreshold
+        ).length,
       }
     })
   ).subscribe({

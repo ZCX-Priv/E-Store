@@ -16,8 +16,13 @@ body {
   height: 100%;
 }
 
+/* html 字体 - 显式声明，覆盖预览环境 user-agent 注入的 Noto Sans SC */
+html {
+  font-family: var(--font-sans);
+}
+
 body {
-  /* 正文字体 - Geist 无衬线 */
+  /* 正文字体 - 系统无衬线（Windows: Segoe UI / Mac: SF / 中文回退微软雅黑/苹方） */
   font-family: var(--font-sans);
   font-size: var(--text-base);
   font-weight: var(--weight-normal);
@@ -36,8 +41,7 @@ body {
   -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 
-  /* 字体特性 - 启用等宽数字变体 */
-  font-feature-settings: 'cv11', 'ss01';
+  /* 字体特性 - 启用常见连字 */
   font-variant-ligatures: common-ligatures;
 
   /* 主题切换过渡 - 避免闪烁 */
@@ -52,14 +56,14 @@ body {
 
 /* ========== 全局排版 ========== */
 
-/* 标题 - 使用 Instrument Serif 衬线字体 */
+/* 标题 - 跟随正文字体 */
 h1,
 h2,
 h3,
 h4,
 h5,
 h6 {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-weight: var(--weight-normal);
   line-height: var(--leading-tight);
   color: var(--color-text);
@@ -111,7 +115,7 @@ b {
   font-weight: var(--weight-semibold);
 }
 
-/* 代码 - 使用 Geist Mono 等宽字体 */
+/* 代码 - 使用等宽字体变量 */
 code,
 kbd,
 samp,

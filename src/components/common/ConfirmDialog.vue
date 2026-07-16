@@ -24,7 +24,7 @@ const emit = defineEmits<{
 <template>
   <Teleport to="body">
     <Transition name="confirm">
-      <div v-if="show" class="confirm-overlay" @click.self="emit('cancel')">
+      <div v-if="show" class="confirm-overlay">
         <div class="confirm-dialog" :class="{ danger }" role="dialog" aria-modal="true" :aria-label="title">
           <!-- 危险操作图标 -->
           <div v-if="danger" class="confirm-icon">
@@ -68,6 +68,7 @@ const emit = defineEmits<{
 
 /* 对话框主体 */
 .confirm-dialog {
+  z-index: var(--z-modal);
   background: var(--color-bg-elevated);
   border-radius: var(--radius-xl);
   padding: var(--space-6);

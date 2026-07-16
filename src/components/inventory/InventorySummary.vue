@@ -4,12 +4,8 @@ import { computed } from 'vue'
 import { useInventoryStats } from '@/composables/useItemCount'
 import { Package, DollarSign, AlertTriangle } from 'lucide-vue-next'
 
-// 从 localStorage 读取低库存阈值（安全处理 null：Number(null) 返回 0 而非 NaN）
-const storedThreshold = localStorage.getItem('low-stock-threshold')
-const parsedThreshold = storedThreshold !== null ? Number(storedThreshold) : NaN
-const threshold = !isNaN(parsedThreshold) ? parsedThreshold : 10
-
-const { totalCount, totalValue, lowStockCount, loading } = useInventoryStats(threshold)
+// 低库存阈值已下沉到每项，这里无需全局阈值
+const { totalCount, totalValue, lowStockCount, loading } = useInventoryStats()
 
 // 格式化价值（千分位）
 const formattedValue = computed(() => {
@@ -130,9 +126,9 @@ const displayValue = computed(() => (loading.value ? '—' : formattedValue.valu
   letter-spacing: 0.05em;
 }
 
-/* 大数字：使用 Instrument Serif 显示字体 */
+/* 大数字：使用正文字体 */
 .summary-value {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-size: var(--text-3xl);
   font-weight: var(--weight-normal);
   color: var(--color-text);

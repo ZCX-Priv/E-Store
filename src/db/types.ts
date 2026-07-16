@@ -15,6 +15,8 @@ export interface Item {
   unit: string
   price: number
   description: string
+  lowStockAlertEnabled: boolean  // 是否启用低库存预警
+  lowStockThreshold: number      // 低库存预警阈值
   order: number
   createdAt: number
   updatedAt: number

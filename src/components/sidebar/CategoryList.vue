@@ -5,7 +5,7 @@ import { useUiStore } from '@/stores/ui'
 import { useCategories, useCategoryCount } from '@/composables/useCategories'
 import { categoryRepo, itemRepo } from '@/db'
 import { SPECIAL_CATEGORIES } from '@/db'
-import { Layers, PackageOpen } from 'lucide-vue-next'
+import { Layers, PackageOpen, FolderX } from 'lucide-vue-next'
 import CategoryItem from './CategoryItem.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
 
@@ -35,8 +35,9 @@ function selectCategory(id: string | number) {
 async function handleAddCategory() {
   const name = `新分类 ${categories.value.length + 1}`
   const id = await categoryRepo.createCategory(name)
-  // 自动选中新建分类
-  selectCategory(id)
+  // 自动选中新建分类（直接调用 store，不 emit select 事件，避免移动端抽屉关闭）
+  uiStore.setView('inventory')
+  uiStore.selectCategory(id)
   // 进入编辑模式（CategoryItem 通过 watch 响应 editing 变化）
   editingId.value = id
 }
@@ -152,6 +153,13 @@ defineExpose({
       @move-item="handleMoveItem"
     />
 
+    <!-- 空状态：暂无分类（收起时不显示，空间不足） -->
+    <div v-if="!loading && categories.length === 0 && !collapsed" class="empty-categories">
+      <FolderX :size="32" class="empty-cat-icon" />
+      <p class="empty-cat-title">暂无分类</p>
+      <p class="empty-cat-desc">点击下方「添加分类」按钮创建</p>
+    </div>
+
     <!-- 加载状态 -->
     <div v-if="loading && !collapsed" class="loading">加载中...</div>
 
@@ -261,5 +269,37 @@ defineExpose({
   text-align: center;
   color: rgba(255, 255, 255, 0.4);
   font-size: var(--text-xs);
+}
+
+/* 空分类占位：撑满剩余空间并居中 */
+.empty-categories {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-4);
+  text-align: center;
+  gap: var(--space-1);
+  min-height: 160px;
+}
+
+.empty-cat-icon {
+  color: rgba(255, 255, 255, 0.3);
+  margin-bottom: var(--space-2);
+}
+
+.empty-cat-title {
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: rgba(255, 255, 255, 0.6);
+  margin: 0;
+}
+
+.empty-cat-desc {
+  font-size: var(--text-xs);
+  color: rgba(255, 255, 255, 0.35);
+  margin: 0;
+  line-height: var(--leading-normal);
 }
 </style>

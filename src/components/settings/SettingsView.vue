@@ -1,8 +1,8 @@
 <script setup lang="ts">
-// 设置视图 - 数据导入导出、低库存阈值、主题模式、关于信息
+// 设置视图 - 数据导入导出、主题模式、关于信息
 import { ref, computed, onMounted } from 'vue'
 import type { Component } from 'vue'
-import { Download, Upload, AlertTriangle, Package, ChevronLeft, Sun, Moon, Monitor } from 'lucide-vue-next'
+import { Download, Upload, Package, ChevronLeft, Sun, Moon, Monitor, Github } from 'lucide-vue-next'
 import { useUiStore } from '@/stores/ui'
 import type { ThemeMode } from '@/stores/ui'
 import { itemRepo, categoryRepo } from '@/db'
@@ -120,16 +120,6 @@ function cancelImport() {
   importPreview.value = null
 }
 
-// ========== 低库存阈值 ==========
-// 从 localStorage 读取，安全处理 null 与 NaN
-const storedThreshold = localStorage.getItem('low-stock-threshold')
-const parsedThreshold = storedThreshold !== null ? Number(storedThreshold) : NaN
-const lowStockThreshold = ref(!isNaN(parsedThreshold) ? parsedThreshold : 10)
-
-function saveThreshold() {
-  localStorage.setItem('low-stock-threshold', String(lowStockThreshold.value))
-}
-
 // ========== 主题模式 ==========
 // 三态切换选项：白昼 / 夜间 / 跟随系统
 const themeOptions: ReadonlyArray<{ value: ThemeMode; label: string; icon: Component }> = [
@@ -155,14 +145,46 @@ function goBack() {
 </script>
 
 <template>
-  <div class="settings-view">
-    <!-- 返回按钮 -->
+  <div class="settings-page">
+    <!-- 返回按钮（贴左，不参与限宽居中） -->
     <button class="back-btn" @click="goBack">
       <ChevronLeft :size="18" />
       返回库存
     </button>
 
-    <h1 class="settings-title">设置</h1>
+    <div class="settings-view">
+      <!-- 偏好设置 -->
+      <section class="settings-section">
+      <h2 class="section-title">偏好设置</h2>
+
+      <div class="setting-cards">
+      <!-- 主题模式 -->
+      <div class="setting-card">
+        <div class="card-header">
+          <component :is="currentThemeIcon" :size="20" class="card-icon" />
+          <div>
+            <h3 class="card-name">主题模式</h3>
+            <p class="card-desc">切换白昼 / 夜间外观，或跟随系统偏好</p>
+          </div>
+        </div>
+        <div class="theme-switcher" role="radiogroup" aria-label="主题模式">
+          <button
+            v-for="opt in themeOptions"
+            :key="opt.value"
+            type="button"
+            role="radio"
+            :aria-checked="uiStore.theme === opt.value"
+            class="theme-option"
+            :class="{ active: uiStore.theme === opt.value }"
+            @click="setTheme(opt.value)"
+          >
+            <component :is="opt.icon" :size="16" />
+            <span>{{ opt.label }}</span>
+          </button>
+        </div>
+      </div>
+      </div>
+    </section>
 
     <!-- 数据管理 -->
     <section class="settings-section">
@@ -206,73 +228,32 @@ function goBack() {
       </div>
     </section>
 
-    <!-- 偏好设置 -->
-    <section class="settings-section">
-      <h2 class="section-title">偏好设置</h2>
-
-      <div class="setting-cards">
-      <div class="setting-card">
-        <div class="card-header">
-          <AlertTriangle :size="20" class="card-icon warning" />
-          <div>
-            <h3 class="card-name">低库存阈值</h3>
-            <p class="card-desc">数量低于此值时显示低库存警示</p>
-          </div>
-        </div>
-        <div class="threshold-control">
-          <input
-            v-model.number="lowStockThreshold"
-            type="number"
-            min="0"
-            class="threshold-input"
-            @change="saveThreshold"
-          />
-          <span class="threshold-unit">个单位</span>
-        </div>
-      </div>
-
-      <!-- 主题模式 -->
-      <div class="setting-card">
-        <div class="card-header">
-          <component :is="currentThemeIcon" :size="20" class="card-icon" />
-          <div>
-            <h3 class="card-name">主题模式</h3>
-            <p class="card-desc">切换白昼 / 夜间外观，或跟随系统偏好</p>
-          </div>
-        </div>
-        <div class="theme-switcher" role="radiogroup" aria-label="主题模式">
-          <button
-            v-for="opt in themeOptions"
-            :key="opt.value"
-            type="button"
-            role="radio"
-            :aria-checked="uiStore.theme === opt.value"
-            class="theme-option"
-            :class="{ active: uiStore.theme === opt.value }"
-            @click="setTheme(opt.value)"
-          >
-            <component :is="opt.icon" :size="16" />
-            <span>{{ opt.label }}</span>
-          </button>
-        </div>
-      </div>
-      </div>
-    </section>
-
     <!-- 关于 -->
     <section class="settings-section">
       <h2 class="section-title">关于</h2>
       <div class="about-card">
         <Package :size="32" class="about-icon" />
-        <div>
-          <h3 class="about-name">库存管理</h3>
+        <div class="about-content">
+          <div class="about-title-row">
+            <h3 class="about-name">E-Store</h3>
+            <a
+              href="https://github.com/ZCX-Priv/E-Store"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="about-link"
+              aria-label="GitHub 仓库"
+            >
+              <Github :size="18" />
+            </a>
+          </div>
           <p class="about-version">版本 1.0.0</p>
-          <p class="about-desc">基于 Vue 3 + Vite + TypeScript + IndexedDB 的本地库存管理工具</p>
         </div>
       </div>
     </section>
+    </div>
 
-    <!-- 导入预览模态框（自定义实现，不依赖 ConfirmDialog） -->
+    <!-- 导入预览模态框（Teleport 到 body，确保层级正确） -->
+    <Teleport to="body">
     <Transition name="confirm">
       <div v-if="importPreview" class="modal-overlay" @click.self="cancelImport">
         <div class="modal-dialog">
@@ -328,15 +309,21 @@ function goBack() {
         </div>
       </div>
     </Transition>
+    </Teleport>
   </div>
 </template>
 
 <style scoped>
-/* 视图容器：居中限宽 */
+/* 页面容器：不限宽，button 贴左 */
+.settings-page {
+  /* 继承 .main-content 的 padding，无需额外样式 */
+}
+
+/* 视图容器：居中限宽（内容仍居中） */
 .settings-view {
   max-width: 800px;
   margin: 0 auto;
-  padding: var(--space-6) var(--space-4);
+  padding: 0 var(--space-4) var(--space-6);
 }
 
 /* 返回按钮：透明文字按钮 */
@@ -345,6 +332,7 @@ function goBack() {
   align-items: center;
   gap: var(--space-1);
   padding: var(--space-2) var(--space-3);
+  margin: 0 0 var(--space-2) 0;
   background: transparent;
   border: none;
   color: var(--color-text-secondary);
@@ -360,15 +348,6 @@ function goBack() {
 }
 .back-btn:active {
   transform: scale(0.97);
-}
-
-/* 页面标题 */
-.settings-title {
-  font-family: var(--font-display);
-  font-size: var(--text-3xl);
-  font-weight: var(--weight-normal);
-  color: var(--color-text);
-  margin: var(--space-4) 0 var(--space-6) 0;
 }
 
 /* 分区 */
@@ -479,34 +458,6 @@ function goBack() {
   transform: scale(0.97);
 }
 
-/* 阈值输入控件 */
-.threshold-control {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-}
-
-.threshold-input {
-  width: 80px;
-  padding: var(--space-2) var(--space-3);
-  background: var(--color-bg-elevated);
-  border: 1px solid var(--color-border-strong);
-  border-radius: var(--radius-md);
-  font-family: var(--font-mono);
-  font-size: var(--text-sm);
-  color: var(--color-text);
-  outline: none;
-  transition: border-color var(--duration-fast) var(--ease-out);
-}
-.threshold-input:focus {
-  border-color: var(--color-accent);
-}
-
-.threshold-unit {
-  font-size: var(--text-sm);
-  color: var(--color-text-secondary);
-}
-
 /* 主题切换器：分段式三选一 */
 .theme-switcher {
   display: flex;
@@ -565,20 +516,30 @@ function goBack() {
   font-size: var(--text-base);
   font-weight: var(--weight-semibold);
   color: var(--color-text);
-  margin: 0 0 var(--space-1) 0;
+  margin: 0;
+}
+
+.about-title-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-bottom: var(--space-1);
+}
+
+.about-link {
+  display: inline-flex;
+  align-items: center;
+  color: var(--color-text-tertiary);
+  transition: color var(--duration-fast) var(--ease-out);
+}
+.about-link:hover {
+  color: var(--color-accent);
 }
 
 .about-version {
   font-size: var(--text-sm);
   color: var(--color-text-secondary);
   margin: 0 0 var(--space-2) 0;
-}
-
-.about-desc {
-  font-size: var(--text-sm);
-  color: var(--color-text-tertiary);
-  margin: 0;
-  line-height: var(--leading-relaxed);
 }
 
 /* ========== 导入预览模态框 ========== */
@@ -595,6 +556,7 @@ function goBack() {
 }
 
 .modal-dialog {
+  z-index: var(--z-modal);
   background: var(--color-bg-elevated);
   border-radius: var(--radius-xl);
   padding: var(--space-6);

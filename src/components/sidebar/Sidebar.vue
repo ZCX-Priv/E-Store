@@ -125,7 +125,7 @@ function handleAddCategory() {
 }
 
 .brand-text {
-  font-family: var(--font-display);
+  font-family: var(--font-sans);
   font-size: var(--text-lg);
   color: var(--color-text-inverse);
   white-space: nowrap;
@@ -198,8 +198,7 @@ function handleAddCategory() {
 
 /* 系统设置区 */
 .sidebar-settings {
-  padding: var(--space-3);
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  padding: 0 var(--space-3) var(--space-3);
   flex-shrink: 0;
 }
 
@@ -212,7 +211,7 @@ function handleAddCategory() {
   padding: var(--space-3) var(--space-4);
   background: transparent;
   color: rgba(255, 255, 255, 0.7);
-  border: none;
+  border: 1px solid var(--color-accent);
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
   font-weight: var(--weight-medium);

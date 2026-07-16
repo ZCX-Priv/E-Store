@@ -23,6 +23,8 @@ const formData = ref<{
   categoryId: number | undefined
   price: number
   description: string
+  lowStockAlertEnabled: boolean
+  lowStockThreshold: number
 }>({
   name: '',
   quantity: 0,
@@ -30,6 +32,8 @@ const formData = ref<{
   categoryId: undefined,
   price: 0,
   description: '',
+  lowStockAlertEnabled: true,
+  lowStockThreshold: 10,
 })
 
 // 分类列表
@@ -76,7 +80,7 @@ watch(() => props.show, async (newShow) => {
     lastFocusedElement = document.activeElement as HTMLElement
     await loadCategories()
     if (props.editItem) {
-      // 编辑模式：预填
+      // 编辑模式：预填（?? 防御历史数据未迁移的极端情况）
       formData.value = {
         name: props.editItem.name,
         quantity: props.editItem.quantity,
@@ -84,9 +88,11 @@ watch(() => props.show, async (newShow) => {
         categoryId: props.editItem.categoryId,
         price: props.editItem.price,
         description: props.editItem.description,
+        lowStockAlertEnabled: props.editItem.lowStockAlertEnabled ?? true,
+        lowStockThreshold: props.editItem.lowStockThreshold ?? 10,
       }
     } else {
-      // 添加模式：重置，默认「不分类」
+      // 添加模式：重置，默认「不分类」+ 开启预警 + 阈值 10
       formData.value = {
         name: '',
         quantity: 0,
@@ -94,6 +100,8 @@ watch(() => props.show, async (newShow) => {
         categoryId: undefined,
         price: 0,
         description: '',
+        lowStockAlertEnabled: true,
+        lowStockThreshold: 10,
       }
     }
     errors.value = {}
@@ -136,6 +144,8 @@ async function handleSave() {
       categoryId: formData.value.categoryId,
       price: formData.value.price,
       description: formData.value.description.trim(),
+      lowStockAlertEnabled: formData.value.lowStockAlertEnabled,
+      lowStockThreshold: formData.value.lowStockThreshold,
     }
 
     if (isEdit.value && props.editItem?.id) {
@@ -195,7 +205,7 @@ onUnmounted(() => {
 <template>
   <Teleport to="body">
     <Transition name="modal">
-      <div v-if="show" class="modal-overlay" @click.self="emit('close')">
+      <div v-if="show" class="modal-overlay">
         <div class="modal-dialog" ref="modalRef" role="dialog" aria-modal="true" :aria-label="title">
           <!-- 头部 -->
           <div class="modal-header">
@@ -270,6 +280,36 @@ onUnmounted(() => {
               <span v-if="errors.price" class="field-error">{{ errors.price }}</span>
             </div>
 
+            <!-- 低库存预警：独立区域 + 安卓样式 toggle 开关 -->
+            <div class="form-field alert-field">
+              <div class="alert-header">
+                <div class="alert-label">
+                  <label class="field-label">低库存预警</label>
+                  <p class="field-hint">开启后，数量低于阈值时显示低库存警示</p>
+                </div>
+                <button
+                  type="button"
+                  class="toggle-switch"
+                  :class="{ on: formData.lowStockAlertEnabled }"
+                  role="switch"
+                  :aria-checked="formData.lowStockAlertEnabled"
+                  @click="formData.lowStockAlertEnabled = !formData.lowStockAlertEnabled"
+                >
+                  <span class="toggle-thumb"></span>
+                </button>
+              </div>
+              <div v-if="formData.lowStockAlertEnabled" class="threshold-control">
+                <span class="threshold-label">阈值：</span>
+                <input
+                  v-model.number="formData.lowStockThreshold"
+                  type="number"
+                  min="0"
+                  class="field-input threshold-input"
+                />
+                <span class="threshold-unit">个单位</span>
+              </div>
+            </div>
+
             <!-- 描述 -->
             <div class="form-field">
               <label class="field-label">描述</label>
@@ -312,6 +352,7 @@ onUnmounted(() => {
 
 /* 对话框主体：抬升表面 + 大圆角 + 深阴影 */
 .modal-dialog {
+  z-index: var(--z-modal);
   background: var(--color-bg-elevated);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-2xl);
@@ -374,6 +415,7 @@ onUnmounted(() => {
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: var(--space-4);
+  min-width: 0;
 }
 
 /* 表单字段：标签 + 输入 + 错误 */
@@ -381,6 +423,7 @@ onUnmounted(() => {
   display: flex;
   flex-direction: column;
   gap: var(--space-2);
+  min-width: 0;
 }
 
 .field-label {
@@ -396,6 +439,7 @@ onUnmounted(() => {
 
 /* 输入框统一样式 */
 .field-input {
+  width: 100%;
   padding: var(--space-2) var(--space-3);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-md);
@@ -432,6 +476,82 @@ onUnmounted(() => {
 .field-error {
   font-size: var(--text-xs);
   color: var(--color-danger);
+}
+
+/* ========== 低库存预警区域 ========== */
+.alert-field {
+  gap: var(--space-2);
+}
+.alert-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-3);
+}
+.alert-label {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+.field-hint {
+  font-size: var(--text-xs);
+  color: var(--color-text-tertiary);
+  margin: 0;
+  line-height: var(--leading-normal);
+}
+.threshold-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+.threshold-input {
+  width: 80px;
+}
+.threshold-label {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+  flex-shrink: 0;
+}
+.threshold-unit {
+  font-size: var(--text-sm);
+  color: var(--color-text-secondary);
+}
+
+/* 安卓 Material Design 风格 toggle 开关 */
+.toggle-switch {
+  position: relative;
+  width: 44px;
+  height: 24px;
+  background: var(--color-border);
+  border: none;
+  border-radius: 12px;
+  cursor: pointer;
+  padding: 0;
+  flex-shrink: 0;
+  transition: background var(--duration-normal) var(--ease-out);
+}
+.toggle-switch.on {
+  background: var(--color-accent);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 20px;
+  height: 20px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: var(--shadow-sm);
+  transition: transform var(--spring-response) var(--ease-out);
+}
+.toggle-switch.on .toggle-thumb {
+  transform: translateX(20px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .toggle-thumb {
+    transition: none;
+  }
 }
 
 /* 底部按钮区 */

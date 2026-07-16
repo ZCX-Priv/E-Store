@@ -184,6 +184,9 @@ const { list, containerProps, wrapperProps } = useVirtualList(items, {
 <style scoped>
 .inventory-view {
   width: 100%;
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 /* 网格视图：自适应列宽 */
@@ -208,11 +211,11 @@ const { list, containerProps, wrapperProps } = useVirtualList(items, {
 
 /* 状态容器：居中布局 */
 .state-container {
+  flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   padding: var(--space-8);
-  min-height: 300px;
   color: var(--color-text-tertiary);
 }
 

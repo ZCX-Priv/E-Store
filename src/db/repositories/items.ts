@@ -125,8 +125,3 @@ export async function getTotalValue(): Promise<number> {
   })
   return total
 }
-
-// 获取低库存项数量（quantity <= threshold，走 quantity 索引）
-export async function getLowStockCount(threshold: number): Promise<number> {
-  return db.items.where('quantity').belowOrEqual(threshold).count()
-}

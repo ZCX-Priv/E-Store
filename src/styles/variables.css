@@ -33,9 +33,8 @@
   --color-border-strong: #d6d3d1;   /* 强边框 */
 
   /* 字体 */
-  --font-sans: 'Geist', system-ui, sans-serif;
-  --font-mono: 'Geist Mono', 'SF Mono', Consolas, monospace;
-  --font-display: 'Instrument Serif', Georgia, serif;
+  --font-sans: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'SF Mono', Consolas, monospace;
 
   /* 字号 */
   --text-xs: 0.75rem;    /* 12px */
@@ -120,8 +119,8 @@
   --z-header: 40;
   --z-drawer-overlay: 45;
   --z-drawer: 46;
-  --z-modal-overlay: 50;
-  --z-modal: 51;
+  --z-modal-overlay: 100;
+  --z-modal: 110;
   --z-tooltip: 60;
 }
 
