@@ -45,7 +45,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 <template>
   <Teleport to="body">
     <Transition name="confirm">
-      <div v-if="show" class="confirm-overlay" @click.self="emit('cancel')">
+      <div v-if="show" class="confirm-overlay">
         <div class="confirm-dialog" :class="{ danger }" role="dialog" aria-modal="true" :aria-label="title">
           <!-- 危险操作图标 -->
           <div v-if="danger" class="confirm-icon">
@@ -162,7 +162,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
   flex: 1;
   padding: var(--space-3) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);

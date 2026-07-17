@@ -155,7 +155,7 @@ function handleSettingsClick() {
 }
 .collapse-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: white;
+  color: var(--color-text-inverse);
 }
 .collapse-btn:active {
   transform: scale(0.97);
@@ -177,7 +177,7 @@ function handleSettingsClick() {
   width: 100%;
   padding: var(--space-3) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -229,14 +229,14 @@ function handleSettingsClick() {
 }
 .settings-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: white;
+  color: var(--color-text-inverse);
 }
 .settings-btn:active {
   transform: scale(0.97);
 }
 .settings-btn.active {
-  background: rgba(16, 185, 129, 0.15);
-  color: white;
+  background: rgba(var(--color-accent-rgb), 0.15);
+  color: var(--color-text-inverse);
 }
 
 /* 收起时仅显示图标 */

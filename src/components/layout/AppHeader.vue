@@ -182,7 +182,7 @@ function switchView(mode: ViewMode) {
 }
 .icon-btn.active {
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 /* 视图切换组 */
@@ -228,7 +228,7 @@ function switchView(mode: ViewMode) {
   flex-shrink: 0;
   padding: var(--space-2) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);

@@ -53,24 +53,19 @@ function handleClose() {
 <style scoped>
 .pwa-toast {
   position: fixed;
-  right: var(--space-4, 1rem);
-  bottom: var(--space-4, 1rem);
+  right: var(--space-4);
+  bottom: var(--space-4);
   z-index: 9999;
   display: flex;
   align-items: center;
-  gap: var(--space-3, 0.75rem);
-  padding: var(--space-3, 0.75rem) var(--space-4, 1rem);
-  background: var(--color-bg-elevated, #ffffff);
-  border: 1px solid var(--color-border, #e7e5e4);
-  border-radius: var(--radius-lg, 0.75rem);
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  background: var(--color-bg-elevated);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
   box-shadow: var(--shadow-lg);
   min-width: 280px;
   max-width: 360px;
-}
-
-[data-theme='dark'] .pwa-toast {
-  background: var(--color-bg-elevated, #1e293b);
-  border-color: var(--color-border, #334155);
 }
 
 .pwa-toast__icon {
@@ -79,9 +74,9 @@ function handleClose() {
   justify-content: center;
   width: 32px;
   height: 32px;
-  border-radius: var(--radius-full, 9999px);
-  background: var(--color-accent, #10b981);
-  color: #ffffff;
+  border-radius: var(--radius-full);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
   flex-shrink: 0;
 }
 
@@ -94,14 +89,14 @@ function handleClose() {
 }
 
 .pwa-toast__title {
-  font-size: var(--text-sm, 0.875rem);
-  font-weight: var(--weight-semibold, 600);
-  color: var(--color-text, #1c1917);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-semibold);
+  color: var(--color-text);
 }
 
 .pwa-toast__desc {
-  font-size: var(--text-xs, 0.75rem);
-  color: var(--color-text-secondary, #78716c);
+  font-size: var(--text-xs);
+  color: var(--color-text-secondary);
 }
 
 .pwa-toast__btn {
@@ -110,39 +105,39 @@ function handleClose() {
   justify-content: center;
   border: none;
   cursor: pointer;
-  font-size: var(--text-sm, 0.875rem);
-  font-weight: var(--weight-medium, 500);
-  border-radius: var(--radius-md, 0.5rem);
-  transition: background-color var(--duration-fast, 150ms) var(--ease-out);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-radius: var(--radius-md);
+  transition: background-color var(--duration-fast) var(--ease-out);
 }
 
 .pwa-toast__btn--primary {
-  padding: var(--space-2, 0.5rem) var(--space-3, 0.75rem);
-  background: var(--color-accent, #10b981);
-  color: #ffffff;
+  padding: var(--space-2) var(--space-3);
+  background: var(--color-accent);
+  color: var(--color-text-inverse);
 }
 
 .pwa-toast__btn--primary:hover {
-  background: var(--color-accent-hover, #059669);
+  background: var(--color-accent-hover);
 }
 
 .pwa-toast__btn--ghost {
-  padding: var(--space-2, 0.5rem);
+  padding: var(--space-2);
   background: transparent;
-  color: var(--color-text-secondary, #78716c);
+  color: var(--color-text-secondary);
 }
 
 .pwa-toast__btn--ghost:hover {
-  background: var(--color-bg-subtle, #f5f4f2);
-  color: var(--color-text, #1c1917);
+  background: var(--color-bg-subtle);
+  color: var(--color-text);
 }
 
 /* 进出过渡 */
 .pwa-toast-enter-active,
 .pwa-toast-leave-active {
   transition:
-    transform var(--duration-normal, 250ms) var(--ease-out),
-    opacity var(--duration-normal, 250ms) var(--ease-out);
+    transform var(--duration-normal) var(--ease-out),
+    opacity var(--duration-normal) var(--ease-out);
 }
 
 .pwa-toast-enter-from,
@@ -155,7 +150,7 @@ function handleClose() {
 @media (prefers-reduced-motion: reduce) {
   .pwa-toast-enter-active,
   .pwa-toast-leave-active {
-    transition: opacity var(--duration-normal, 250ms) ease;
+    transition: opacity var(--duration-normal) ease;
   }
 }
 </style>

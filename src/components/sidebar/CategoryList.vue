@@ -329,13 +329,13 @@ defineExpose({
 
 .category-item:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 /* 选中状态：翡翠绿背景 + 左侧强调条 */
 .category-item.active {
-  background: rgba(16, 185, 129, 0.15);
-  color: white;
+  background: rgba(var(--color-accent-rgb), 0.15);
+  color: var(--color-text-inverse);
 }
 .category-item.active::before {
   content: '';

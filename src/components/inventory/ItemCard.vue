@@ -280,7 +280,7 @@ function onDragStart(e: DragEvent) {
 }
 .qty-btn:hover {
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
 }
 .qty-btn:active {
   transform: scale(0.97);

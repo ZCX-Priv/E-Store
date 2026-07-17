@@ -294,7 +294,7 @@ function goBack() {
     <!-- 导入预览模态框（Teleport 到 body，确保层级正确） -->
     <Teleport to="body">
     <Transition name="confirm">
-      <div v-if="importPreview" class="modal-overlay" @click.self="cancelImport">
+      <div v-if="importPreview" class="modal-overlay">
         <div class="modal-dialog">
           <h3 class="modal-title">确认导入</h3>
 
@@ -456,7 +456,7 @@ function goBack() {
 .btn-primary {
   padding: var(--space-2) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);
@@ -705,7 +705,7 @@ function goBack() {
   flex: 1;
   padding: var(--space-3) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);

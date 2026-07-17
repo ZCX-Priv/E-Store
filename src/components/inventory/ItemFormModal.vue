@@ -490,7 +490,7 @@ onUnmounted(() => {
 .field-input:focus {
   border-color: var(--color-accent);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.1);
 }
 .field-input.error {
   border-color: var(--color-danger);
@@ -577,7 +577,7 @@ onUnmounted(() => {
   left: 2px;
   width: 20px;
   height: 20px;
-  background: white;
+  background: var(--color-bg-elevated);
   border-radius: 50%;
   box-shadow: var(--shadow-sm);
   transition: transform var(--spring-response) var(--ease-out);
@@ -623,7 +623,7 @@ onUnmounted(() => {
 .btn-primary {
   padding: var(--space-2) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);

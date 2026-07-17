@@ -101,12 +101,12 @@ const displayValue = computed(() => (loading.value ? '—' : formattedValue.valu
 }
 
 .summary-card.accent .summary-icon {
-  background: rgba(16, 185, 129, 0.1);
+  background: rgba(var(--color-accent-rgb), 0.1);
   color: var(--color-accent);
 }
 
 .summary-card.warning .summary-icon {
-  background: rgba(245, 158, 11, 0.1);
+  background: rgba(var(--color-warning-rgb), 0.1);
   color: var(--color-warning);
 }
 

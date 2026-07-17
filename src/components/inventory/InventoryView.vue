@@ -282,7 +282,7 @@ const { list, containerProps, wrapperProps } = useVirtualList(items, {
 .btn-primary {
   padding: var(--space-2) var(--space-4);
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
   border: none;
   border-radius: var(--radius-md);
   font-size: var(--text-sm);

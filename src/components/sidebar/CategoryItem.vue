@@ -218,13 +218,13 @@ function onDrop(e: DragEvent) {
 
 .category-item:hover {
   background: rgba(255, 255, 255, 0.08);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 /* 选中状态：翡翠绿背景 + 左侧 3px 强调条 */
 .category-item.active {
-  background: rgba(16, 185, 129, 0.15);
-  color: white;
+  background: rgba(var(--color-accent-rgb), 0.15);
+  color: var(--color-text-inverse);
 }
 .category-item.active::before {
   content: '';
@@ -240,8 +240,8 @@ function onDrop(e: DragEvent) {
 
 /* 跨分类拖拽悬停：高亮虚线边框，提示可放置 */
 .category-item.drag-over {
-  background: rgba(16, 185, 129, 0.22);
-  color: white;
+  background: rgba(var(--color-accent-rgb), 0.22);
+  color: var(--color-text-inverse);
   outline: 2px dashed var(--color-accent);
   outline-offset: -2px;
 }
@@ -300,20 +300,20 @@ function onDrop(e: DragEvent) {
 }
 .action-btn:hover {
   background: rgba(255, 255, 255, 0.12);
-  color: white;
+  color: var(--color-text-inverse);
 }
 .action-btn:active {
   transform: scale(0.97);
 }
 .action-btn.danger:hover {
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(var(--color-danger-rgb), 0.2);
   color: var(--color-danger);
 }
 
 /* 三点按钮：常亮，激活态高亮 */
 .more-btn.active {
   background: rgba(255, 255, 255, 0.12);
-  color: white;
+  color: var(--color-text-inverse);
 }
 
 /* 二级菜单浮层：绝对定位，右侧弹出 */
@@ -386,14 +386,18 @@ function onDrop(e: DragEvent) {
   background: rgba(0, 0, 0, 0.3);
   border: 1px solid var(--color-accent);
   border-radius: var(--radius-sm);
-  color: white;
+  color: var(--color-text-inverse);
   font-size: var(--text-sm);
   font-family: var(--font-sans);
   outline: none;
 }
 .edit-input:focus {
   border-color: var(--color-accent);
-  box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
+  box-shadow: 0 0 0 2px rgba(var(--color-accent-rgb), 0.2);
+}
+.edit-input::selection {
+  color: var(--color-text-inverse);
+  background-color: rgba(var(--color-accent-rgb), 0.3);
 }
 
 .edit-btn {
@@ -413,7 +417,7 @@ function onDrop(e: DragEvent) {
 }
 .edit-btn.confirm {
   background: var(--color-accent);
-  color: white;
+  color: var(--color-text-inverse);
 }
 .edit-btn.confirm:hover {
   background: var(--color-accent-hover);
@@ -424,6 +428,6 @@ function onDrop(e: DragEvent) {
 }
 .edit-btn.cancel:hover {
   background: rgba(255, 255, 255, 0.2);
-  color: white;
+  color: var(--color-text-inverse);
 }
 </style>
