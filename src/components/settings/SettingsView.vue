@@ -158,11 +158,11 @@ function cancelImport() {
 }
 
 // ========== 主题模式 ==========
-// 三态切换选项：白昼 / 夜间 / 跟随系统
+// 三态切换选项：跟随系统 / 白昼 / 夜间
 const themeOptions: ReadonlyArray<{ value: ThemeMode; label: string; icon: Component }> = [
+  { value: 'system', label: '跟随系统', icon: Monitor },
   { value: 'light', label: '白昼', icon: Sun },
   { value: 'dark', label: '夜间', icon: Moon },
-  { value: 'system', label: '跟随系统', icon: Monitor },
 ]
 
 // 当前主题对应的图标（卡片头部展示）
