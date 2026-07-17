@@ -81,7 +81,7 @@ onMounted(async () => {
     <!-- 全局 Toast 通知（Teleport 到 body，放置位置不影响层级） -->
     <ToastContainer />
 
-    <!-- 新版本更新提示 -->
+    <!-- PWA 新版本更新提示 -->
     <PwaUpdateToast />
   </div>
 </template>

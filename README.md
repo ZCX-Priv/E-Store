@@ -12,7 +12,7 @@
 - 低库存警示：自定义低库存阈值，低于阈值时高亮警示
 - 主题模式：支持白昼、夜间、跟随系统三种模式
 - 响应式设计：适配桌面端、平板和移动端
-- 可安装：支持安装到桌面/主屏幕，完全离线可用，自动更新
+- PWA 支持：可安装到桌面/主屏幕，完全离线可用，自动更新
 
 ## 技术栈
 
@@ -73,9 +73,9 @@ npm run build
 npm run preview
 ```
 
-### 生成应用图标
+### 生成 PWA 图标
 
-修改 `public/icon-source.svg` 后重新生成所有尺寸的应用图标：
+修改 `public/icon-source.svg` 后重新生成所有尺寸的 PWA 图标：
 
 ```bash
 npm run gen-pwa-assets
@@ -87,4 +87,4 @@ npm run gen-pwa-assets
 
 ## License
 
-MIT
+本项目依据[MIT](/LICENSE)协议开源。
