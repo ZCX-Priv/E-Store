@@ -206,6 +206,7 @@ defineExpose({
     >
       <PackageOpen :size="18" class="item-icon" />
       <span v-if="!collapsed" class="item-name">未分类</span>
+      <span v-if="!collapsed" class="item-count">{{ getCount(0) }}</span>
     </button>
 
     <!-- 分隔线 -->
