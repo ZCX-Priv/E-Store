@@ -1,41 +1,14 @@
-import { ref, onScopeDispose } from 'vue'
-import { liveQuery } from 'dexie'
-import { from } from 'rxjs'
-import { itemRepo } from '@/db'
+import { computed } from 'vue'
+import { useInventoryData } from './useInventoryData'
 
 // 响应式获取库存统计（总条目数、总价值、低库存数）
-// 低库存判定按每项自身的 lowStockAlertEnabled + lowStockThreshold
+// 从共享数据源派生，低库存按每项自身的 lowStockAlertEnabled + lowStockThreshold 判定
 export function useInventoryStats() {
-  const totalCount = ref(0)
-  const totalValue = ref(0)
-  const lowStockCount = ref(0)
-  const loading = ref(true)
+  const { inventoryStats, itemsLoading } = useInventoryData()
 
-  const subscription = from(
-    liveQuery(async () => {
-      const items = await itemRepo.getAllItems()
-      return {
-        total: items.length,
-        value: items.reduce((sum, i) => sum + i.price * i.quantity, 0),
-        lowStock: items.filter(
-          (i) => i.lowStockAlertEnabled && i.quantity <= i.lowStockThreshold
-        ).length,
-      }
-    })
-  ).subscribe({
-    next: (result) => {
-      totalCount.value = result.total
-      totalValue.value = result.value
-      lowStockCount.value = result.lowStock
-      loading.value = false
-    },
-    error: (err) => {
-      console.error('加载统计失败:', err)
-      loading.value = false
-    },
-  })
+  const totalCount = computed(() => inventoryStats.value.total)
+  const totalValue = computed(() => inventoryStats.value.value)
+  const lowStockCount = computed(() => inventoryStats.value.lowStock)
 
-  onScopeDispose(() => subscription.unsubscribe())
-
-  return { totalCount, totalValue, lowStockCount, loading }
+  return { totalCount, totalValue, lowStockCount, loading: itemsLoading }
 }

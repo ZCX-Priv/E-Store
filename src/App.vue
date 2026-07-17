@@ -6,6 +6,7 @@ import { useUiStore } from '@/stores/ui'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { useToast } from '@/composables/useToast'
 import { categoryRepo } from '@/db'
+import { safeGetItem, safeSetItem } from '@/utils/storage'
 import AppHeader from '@/components/layout/AppHeader.vue'
 import Sidebar from '@/components/sidebar/Sidebar.vue'
 import MainContent from '@/components/layout/MainContent.vue'
@@ -40,9 +41,9 @@ watch(
 onMounted(async () => {
   await categoryRepo.migrateUncategorizedCategory()
   // 首次进入欢迎（持久化，仅显示一次）
-  if (!localStorage.getItem('inventory-welcomed')) {
+  if (!safeGetItem('inventory-welcomed')) {
     toast.info('欢迎使用 E-Store 库存管理')
-    localStorage.setItem('inventory-welcomed', 'true')
+    safeSetItem('inventory-welcomed', 'true')
   }
 })
 </script>
@@ -90,6 +91,7 @@ onMounted(async () => {
 .app-layout {
   display: flex;
   min-height: 100vh;
+  min-height: 100dvh;
   background: var(--color-bg);
 }
 
@@ -97,6 +99,7 @@ onMounted(async () => {
 .sidebar-desktop {
   flex-shrink: 0;
   height: 100vh;
+  height: 100dvh;
   position: sticky;
   top: 0;
 }
@@ -107,6 +110,7 @@ onMounted(async () => {
   top: 0;
   left: 0;
   height: 100vh;
+  height: 100dvh;
   z-index: var(--z-drawer);
 }
 

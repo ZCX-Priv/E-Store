@@ -11,11 +11,9 @@
   },
   "dependencies": {
     "@vueuse/core": "^14.3.0",
-    "@vueuse/motion": "^3.0.3",
     "dexie": "^4.4.4",
     "lucide-vue-next": "^0.577.0",
     "pinia": "^3.0.4",
-    "rxjs": "^7.8.2",
     "vue": "^3.5.39",
     "vue-draggable-plus": "^0.6.1",
     "xlsx": "^0.18.5"

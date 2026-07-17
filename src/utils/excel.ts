@@ -1,5 +1,6 @@
 // Excel 导入导出工具 - 基于 xlsx 库
-import * as XLSX from 'xlsx'
+// xlsx 体积较大（约 280KB gzip），采用动态 import，仅在实际导入/导出时才加载，
+// 使其拆为独立异步 chunk，不阻塞首屏
 import type { Item, Category } from '@/db'
 
 // Excel 列名映射（中文表头）
@@ -12,8 +13,9 @@ const EXCEL_COLUMNS = {
   description: '描述',
 } as const
 
-// 导出库存项为 Excel 文件
-export function exportItemsToExcel(items: Item[], categories: Category[]): void {
+// 导出库存项为 Excel 文件（按需加载 xlsx）
+export async function exportItemsToExcel(items: Item[], categories: Category[]): Promise<void> {
+  const XLSX = await import('xlsx')
   // 构建 categoryId -> name 映射，用于在导出时显示分类名称
   const categoryMap = new Map<number, string>()
   for (const cat of categories) {
@@ -76,6 +78,7 @@ export async function parseExcelFile(
 ): Promise<ImportPreview> {
   // 读取文件为 ArrayBuffer
   const buffer = await file.arrayBuffer()
+  const XLSX = await import('xlsx')
   const wb = XLSX.read(buffer, { type: 'array' })
 
   // 获取第一个工作表
@@ -89,6 +92,13 @@ export async function parseExcelFile(
   const categoryMap = new Map<string, number>()
   for (const cat of categories) {
     if (cat.id) categoryMap.set(cat.name, cat.id)
+  }
+
+  // 构建 现有库存 name -> item 映射（首个同名者优先，O(1) 查冲突，避免逐行 find 的 O(n*m)）
+  // 注：name 非唯一，若库中存在同名重复项，仅命中首个——为已知限制
+  const existingByName = new Map<string, Item>()
+  for (const it of existingItems) {
+    if (!existingByName.has(it.name)) existingByName.set(it.name, it)
   }
 
   // 逐行解析
@@ -119,7 +129,7 @@ export async function parseExcelFile(
     parsedItems.push(item)
 
     // 检查冲突：与现有库存同名
-    const existing = existingItems.find((i) => i.name === name)
+    const existing = existingByName.get(name)
     if (existing) {
       conflictItems.push({ name, existing })
     }

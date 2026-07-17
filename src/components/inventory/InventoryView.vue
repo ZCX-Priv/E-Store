@@ -87,11 +87,13 @@ async function handleDragEnd() {
 
 // ========== 虚拟滚动（列表视图，超过 100 条时启用） ==========
 // 判断是否需要虚拟滚动：少量数据用虚拟列表反而增加复杂度
+// 同一阈值也用于网格：>100 条时停用网格拖拽（规避海量节点的 Sortable 开销与大列表重排）
 const needsVirtualScroll = computed(() => items.value.length > 100)
 
 // 虚拟列表（仅列表视图使用，网格视图因卡片高度不固定不适合固定 itemHeight 的虚拟滚动）
 const { list, containerProps, wrapperProps } = useVirtualList(items, {
-  itemHeight: 60, // 列表行高度
+  // 每个虚拟槽位固定 72px（行内容 56~65px 可变，用固定槽位包裹以保证定位精确）
+  itemHeight: 72,
   overscan: 10, // 预渲染上下额外 10 条，减少滚动白屏
 })
 </script>
@@ -123,6 +125,7 @@ const { list, containerProps, wrapperProps } = useVirtualList(items, {
         key="grid"
         v-model="draggableItems"
         :animation="200"
+        :disabled="needsVirtualScroll"
         group="inventory"
         ghost-class="drag-ghost"
         chosen-class="drag-chosen"
@@ -148,13 +151,17 @@ const { list, containerProps, wrapperProps } = useVirtualList(items, {
         class="list-view-virtual"
       >
         <div v-bind="wrapperProps">
-          <ItemRow
+          <div
             v-for="{ data: item } in list"
             :key="item.id"
-            :item="item"
-            @edit="emit('edit', $event)"
-            @delete="requestDelete"
-          />
+            class="virtual-row"
+          >
+            <ItemRow
+              :item="item"
+              @edit="emit('edit', $event)"
+              @delete="requestDelete"
+            />
+          </div>
         </div>
       </div>
 
@@ -220,7 +227,16 @@ const { list, containerProps, wrapperProps } = useVirtualList(items, {
 /* 虚拟列表容器：固定高度 + 内部滚动（containerProps 已设置 overflow-y: auto） */
 .list-view-virtual {
   height: 70vh;
+  height: 70dvh;
   max-height: 800px;
+}
+
+/* 虚拟行外层：固定高度槽位，保证 useVirtualList 定位精确（行内容高度可变，故用固定槽位包裹） */
+.virtual-row {
+  height: 72px;
+}
+.virtual-row :deep(.item-row) {
+  animation: none; /* 滚动时行会复用/重挂载，禁用入场动画避免闪烁 */
 }
 
 /* 状态容器：居中布局 */

@@ -1,8 +1,9 @@
 <script setup lang="ts">
 // 通用确认对话框 - Apple 风格，从中心缩放展开
+import { ref, watch, nextTick, onMounted, onUnmounted } from 'vue'
 import { AlertTriangle } from 'lucide-vue-next'
 
-withDefaults(defineProps<{
+const props = withDefaults(defineProps<{
   show: boolean
   title: string
   message: string
@@ -19,12 +20,32 @@ const emit = defineEmits<{
   confirm: []
   cancel: []
 }>()
+
+// 确认按钮引用：打开时自动聚焦，便于键盘操作
+const confirmBtnRef = ref<HTMLButtonElement | null>(null)
+
+watch(() => props.show, async (show) => {
+  if (show) {
+    await nextTick()
+    confirmBtnRef.value?.focus()
+  }
+})
+
+// ESC 关闭（与项目内其它模态一致）
+function handleKeydown(e: KeyboardEvent) {
+  if (props.show && e.key === 'Escape') {
+    emit('cancel')
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', handleKeydown))
+onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
   <Teleport to="body">
     <Transition name="confirm">
-      <div v-if="show" class="confirm-overlay">
+      <div v-if="show" class="confirm-overlay" @click.self="emit('cancel')">
         <div class="confirm-dialog" :class="{ danger }" role="dialog" aria-modal="true" :aria-label="title">
           <!-- 危险操作图标 -->
           <div v-if="danger" class="confirm-icon">
@@ -42,7 +63,7 @@ const emit = defineEmits<{
             <button class="btn-cancel" @click="emit('cancel')">
               {{ cancelText }}
             </button>
-            <button class="btn-confirm" :class="{ danger }" @click="emit('confirm')">
+            <button ref="confirmBtnRef" class="btn-confirm" :class="{ danger }" @click="emit('confirm')">
               {{ confirmText }}
             </button>
           </div>

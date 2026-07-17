@@ -14,11 +14,9 @@ export async function getCategoryById(id: number): Promise<Category | undefined>
 
 // 创建分类（自动计算 order = 最大 order + 1）
 export async function createCategory(name: string): Promise<number> {
-  // 读取全部分类以计算当前最大 order
+  // 读取全部分类以计算当前最大 order（reduce 避免 Math.max(...大数组) 栈溢出）
   const allCategories = await db.categories.toArray()
-  const maxOrder = allCategories.length > 0
-    ? Math.max(...allCategories.map(c => c.order))
-    : -1
+  const maxOrder = allCategories.reduce((m, c) => Math.max(m, c.order), -1)
   return db.categories.add({
     name,
     order: maxOrder + 1,

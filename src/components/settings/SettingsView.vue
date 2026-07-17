@@ -97,13 +97,19 @@ async function confirmImport() {
     // 实际写入（新增+覆盖）条数，用于反馈提示
     let importedCount = 0
 
+    // 现有库存 name -> item 映射（首个同名者优先），O(1) 查找，避免逐项 find/some 的 O(n^2)
+    const existingByName = new Map<string, Item>()
+    for (const it of allItems.value) {
+      if (it.id && !existingByName.has(it.name)) existingByName.set(it.name, it)
+    }
+
     if (importMode.value === 'overwrite' && importPreview.value.conflicts > 0) {
       // 覆盖模式：更新同名项，添加新项
       const toUpdate: Item[] = []
       const toAdd: Omit<Item, 'id'>[] = []
 
       for (const item of rawItems) {
-        const existing = allItems.value.find((i) => i.name === item.name)
+        const existing = existingByName.get(item.name)
         if (existing && existing.id) {
           // 覆盖字段，但保留既有 id / order / createdAt
           toUpdate.push({ ...existing, ...item, id: existing.id, updatedAt: now })
@@ -121,8 +127,9 @@ async function confirmImport() {
       importedCount = toUpdate.length + toAdd.length
     } else {
       // 跳过模式：仅添加非冲突项
+      const conflictNames = new Set(importPreview.value!.conflictItems.map((c) => c.name))
       const toAdd = rawItems
-        .filter((item) => !importPreview.value!.conflictItems.some((c) => c.name === item.name))
+        .filter((item) => !conflictNames.has(item.name))
         .map((item, i) => decorateNew(item, i))
       if (toAdd.length > 0) {
         await itemRepo.bulkAddItems(toAdd)

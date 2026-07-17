@@ -69,4 +69,23 @@ export default defineConfig({
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        // 依赖分包：将大型/稳定的第三方库拆为独立长缓存 chunk，
+        // 应用代码更新时不会使这些 vendor 缓存失效，提升复访命中率。
+        // xlsx 已由动态 import 自动拆分为按需异步 chunk。
+        manualChunks(id) {
+          if (!id.includes('node_modules')) return
+          if (id.includes('xlsx')) return 'xlsx'
+          if (id.includes('dexie')) return 'vendor-dexie'
+          if (id.includes('sortablejs') || id.includes('vue-draggable-plus')) return 'vendor-dnd'
+          if (id.includes('lucide')) return 'vendor-icons'
+          if (id.includes('@vueuse')) return 'vendor-vueuse'
+          if (id.includes('/vue/') || id.includes('/@vue/') || id.includes('pinia')) return 'vendor-vue'
+          return 'vendor'
+        },
+      },
+    },
+  },
 })

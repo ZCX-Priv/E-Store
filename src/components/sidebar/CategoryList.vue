@@ -170,9 +170,8 @@ function getTotalCount(): number {
 // liveQuery 会自动刷新当前视图与分类计数
 async function handleMoveItem(itemId: number, categoryId: number) {
   const itemsInTarget = await itemRepo.getItemsByCategory(categoryId)
-  const maxOrder = itemsInTarget.length > 0
-    ? Math.max(...itemsInTarget.map((i) => i.order))
-    : -1
+  // reduce 求最大，避免 Math.max(...大数组) 栈溢出
+  const maxOrder = itemsInTarget.reduce((m, i) => Math.max(m, i.order), -1)
   await itemRepo.moveItemToCategory(itemId, categoryId, maxOrder + 1)
   // 标记该项刚被跨分类移动，避免 InventoryView 的拖拽重排序回写覆盖新 order
   uiStore.markItemMoved(itemId)

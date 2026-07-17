@@ -17,22 +17,20 @@ export async function getItemById(id: number): Promise<Item | undefined> {
 }
 
 // 创建库存项（自动计算 order = 该分类下最大 order + 1，设置 createdAt/updatedAt）
+// 已知限制：order 为「分类内相对序」，跨分类的 order 值会重叠；因此「全部」视图按
+// order 排序时，不同分类的项可能交错（仅影响初始展示顺序，拖拽后会重写为全局 index）
 export async function createItem(
   data: Omit<Item, 'id' | 'order' | 'createdAt' | 'updatedAt'>,
 ): Promise<number> {
   let maxOrder = -1
   if (data.categoryId !== undefined) {
     const itemsInCategory = await db.items.where('categoryId').equals(data.categoryId).toArray()
-    maxOrder = itemsInCategory.length > 0
-      ? Math.max(...itemsInCategory.map(i => i.order))
-      : -1
+    // reduce 求最大，避免 Math.max(...大数组) 的参数栈溢出
+    maxOrder = itemsInCategory.reduce((m, i) => Math.max(m, i.order), -1)
   } else {
-    // 无分类：查询所有 categoryId 为 undefined 的库存项
+    // 无分类：遍历所有 categoryId 为 undefined 的库存项求最大 order
     const allItems = await db.items.toArray()
-    const uncategorized = allItems.filter(i => i.categoryId === undefined)
-    maxOrder = uncategorized.length > 0
-      ? Math.max(...uncategorized.map(i => i.order))
-      : -1
+    maxOrder = allItems.reduce((m, i) => (i.categoryId === undefined ? Math.max(m, i.order) : m), -1)
   }
   const now = Date.now()
   return db.items.add({
