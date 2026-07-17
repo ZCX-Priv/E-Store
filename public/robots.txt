@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# E-Store 是单页面应用，所有内容在 index.html 中
+# 数据完全本地存储（IndexedDB），无需爬取动态接口

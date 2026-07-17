@@ -3,7 +3,7 @@ import vue from '@vitejs/plugin-vue'
 import { VitePWA } from 'vite-plugin-pwa'
 import { fileURLToPath, URL } from 'node:url'
 
-// Vite 配置：库存管理系统（PWA - 可安装 / 离线可用）
+// Vite 配置：库存管理系统（可安装 / 离线可用）
 export default defineConfig({
   plugins: [
     vue(),
@@ -12,9 +12,10 @@ export default defineConfig({
       injectRegister: 'auto', // 自动注入 SW 注册代码
       includeAssets: ['favicon.ico', 'apple-touch-icon-180x180.png', 'icon-source.svg'],
       manifest: {
-        name: 'E-Store 库存管理',
+        name: 'E-Store',
         short_name: 'E-Store',
-        description: '本地库存管理工具，支持分类、Excel 导入导出、低库存警示',
+        description:
+          'E-Store 是一款基于浏览器的本地库存管理工具，支持库存分类管理、Excel 批量导入导出、低库存预警、虚拟滚动、多主题模式，数据完全离线存储于 IndexedDB，可安装到桌面与手机主屏幕，安装后完全离线可用，无需后端服务。',
         lang: 'zh-CN',
         dir: 'ltr',
         start_url: '/',

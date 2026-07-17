@@ -7,20 +7,73 @@
     <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
 
-    <!-- PWA 主题色：影响 Android 地址栏 / Windows 标题栏颜色 -->
+    <!-- 主题色：影响 Android 地址栏 / Windows 标题栏颜色 -->
     <meta name="theme-color" content="#10b981" />
     <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0f172a" />
 
-    <!-- iOS PWA 支持：独立运行 + 状态栏样式 -->
+    <!-- iOS 独立运行支持：状态栏样式 -->
     <meta name="apple-mobile-web-app-capable" content="yes" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="E-Store" />
 
-    <!-- 应用描述（部分浏览器在安装弹窗中显示） -->
-    <meta name="description" content="本地库存管理工具，支持分类、Excel 导入导出、低库存警示" />
+    <!-- 应用描述：搜索引擎抓取 + 安装弹窗展示 + AI 引擎理解 -->
+    <meta name="description" content="E-Store 是一款基于浏览器的本地库存管理工具，支持库存分类管理、Excel 批量导入导出、低库存预警、虚拟滚动、多主题模式，数据完全离线存储于 IndexedDB，可安装到桌面与手机主屏幕，安装后完全离线可用，无需后端服务。" />
+    <meta name="keywords" content="E-Store,库存管理,库存管理系统,离线库存,本地库存,库存工具,可安装应用,IndexedDB,Vue,Excel导入导出,低库存预警,库存分类,进销存,仓库管理" />
+    <meta name="author" content="E-Store" />
+    <meta name="robots" content="index, follow" />
+    <meta name="application-name" content="E-Store" />
 
-    <title>库存管理</title>
+    <!-- Canonical 与 og:url 不在 HTML 中静态写入（避免 Vite 把 "/" 当资源处理报 EISDIR） -->
+    <!-- 它们由 main.ts 的 setupDynamicSeo() 在运行时根据 window.location 动态创建为绝对 URL -->
+
+    <!-- Open Graph：社交平台（微信/微博/Twitter/Facebook）分享卡片展示 -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="E-Store" />
+    <meta property="og:title" content="E-Store - 本地库存管理工具" />
+    <meta property="og:description" content="基于浏览器的本地库存管理工具，支持库存分类、Excel 导入导出、低库存预警，数据离线存储于 IndexedDB，可安装、完全离线可用。" />
+    <meta property="og:image" content="/pwa-512x512.png" />
+    <meta property="og:locale" content="zh_CN" />
+
+    <!-- Twitter Card：Twitter/X 分享卡片 -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="E-Store - 本地库存管理工具" />
+    <meta name="twitter:description" content="基于浏览器的本地库存管理工具，支持库存分类、Excel 导入导出、低库存预警，可安装、完全离线可用。" />
+    <meta name="twitter:image" content="/pwa-512x512.png" />
+
+    <!-- JSON-LD 结构化数据：WebApplication schema，url/screenshot 运行时由 main.ts 动态修正为绝对 URL -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "E-Store",
+      "alternateName": "E-Store 库存管理",
+      "description": "基于浏览器的本地库存管理工具，支持库存分类管理、Excel 批量导入导出、低库存预警、虚拟滚动、多主题模式，数据完全离线存储于 IndexedDB，可安装、完全离线可用。",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "Web Browser",
+      "browserRequirements": "Requires JavaScript",
+      "inLanguage": "zh-CN",
+      "softwareVersion": "1.0.0",
+      "url": "/",
+      "screenshot": "/pwa-512x512.png",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "CNY"
+      },
+      "featureList": [
+        "库存项管理：添加、编辑、删除",
+        "分类管理：自定义分类，拖拽排序",
+        "视图切换：网格/列表，虚拟滚动",
+        "Excel 导入导出：批量数据处理",
+        "低库存警示：自定义阈值",
+        "主题模式：白昼/夜间/跟随系统",
+        "可安装：支持安装到桌面/主屏幕，离线可用，自动更新"
+      ]
+    }
+    </script>
+
+    <title>E-Store - 本地库存管理工具 | 离线可用 · Excel 导入导出 · 低库存预警</title>
   </head>
   <body>
     <div id="app"></div>
