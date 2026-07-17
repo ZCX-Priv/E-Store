@@ -76,8 +76,13 @@ function onDragStart(e: DragEvent) {
   <div class="item-card" :class="{ 'low-stock': isLowStock() }" @dragstart="onDragStart">
     <!-- 头部：图标 + 操作 -->
     <div class="card-header">
-      <div class="card-icon">
-        <Package :size="18" />
+      <div class="card-header-left">
+        <div class="card-icon">
+          <Package :size="18" />
+        </div>
+        <span v-if="isLowStock()" class="low-stock-badge">
+          低库存
+        </span>
       </div>
       <div class="card-actions">
         <button class="action-btn" @click="emit('edit', item)" aria-label="编辑">
@@ -114,13 +119,10 @@ function onDragStart(e: DragEvent) {
       </button>
     </div>
 
-    <!-- 底部：价格 + 低库存警示 -->
+    <!-- 底部：价格 -->
     <div class="card-footer">
       <span v-if="item.price > 0" class="card-price">
         ¥{{ item.price.toFixed(2) }}
-      </span>
-      <span v-if="isLowStock()" class="low-stock-badge">
-        低库存
       </span>
     </div>
   </div>
@@ -149,6 +151,12 @@ function onDragStart(e: DragEvent) {
   justify-content: space-between;
   align-items: center;
   margin-bottom: var(--space-3);
+}
+
+.card-header-left {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
 }
 
 .card-icon {

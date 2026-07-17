@@ -58,6 +58,9 @@ const categoryIdProxy = computed<string>({
   },
 })
 
+// 阈值单位文案：跟随「单位」输入实时变化，空值显示通用占位词「单位」
+const thresholdUnitText = computed(() => formData.value.unit.trim() || '单位')
+
 // 错误信息
 const errors = ref<{ name?: string; quantity?: string; price?: string; threshold?: string }>({})
 
@@ -339,7 +342,7 @@ onUnmounted(() => {
                   class="field-input threshold-input"
                   :class="{ error: errors.threshold }"
                 />
-                <span class="threshold-unit">个单位</span>
+                <span class="threshold-unit">{{ thresholdUnitText }}</span>
               </div>
               <span v-if="errors.threshold" class="field-error">{{ errors.threshold }}</span>
             </div>

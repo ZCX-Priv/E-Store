@@ -31,6 +31,17 @@ export async function renameCategory(id: number, name: string): Promise<void> {
   await db.categories.update(id, { name })
 }
 
+// 更新分类排序（批量，单事务）
+export async function updateCategoriesOrder(
+  categories: { id: number; order: number }[]
+): Promise<void> {
+  await db.transaction('rw', db.categories, async () => {
+    await db.categories.bulkUpdate(
+      categories.map(({ id, order }) => ({ key: id, changes: { order } }))
+    )
+  })
+}
+
 // 删除分类（单事务：删除分类 + 其下库存项变为无分类 categoryId=undefined）
 export async function deleteCategory(id: number): Promise<void> {
   await db.transaction('rw', db.categories, db.items, async () => {

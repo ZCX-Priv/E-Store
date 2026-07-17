@@ -1,11 +1,13 @@
 <script setup lang="ts">
 // 分类列表 - 含固定项（全部、未分类）和动态分类
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { VueDraggable } from 'vue-draggable-plus'
 import { useUiStore } from '@/stores/ui'
 import { useCategories, useCategoryCount } from '@/composables/useCategories'
 import { useToast } from '@/composables/useToast'
 import { categoryRepo, itemRepo } from '@/db'
 import { SPECIAL_CATEGORIES } from '@/db'
+import type { Category } from '@/db'
 import { Layers, PackageOpen, FolderX } from 'lucide-vue-next'
 import CategoryItem from './CategoryItem.vue'
 import ConfirmDialog from '@/components/common/ConfirmDialog.vue'
@@ -28,6 +30,44 @@ const editingId = ref<number | null>(null)
 
 // 刚创建、待命名的分类 id：命名会话结束后才提示“已创建”
 const pendingCreateId = ref<number | null>(null)
+
+// ===== 分类拖拽排序 =====
+// 本地可拖拽副本（VueDraggable 需要可写 v-model，categories 来自 liveQuery 只读）
+const draggableCategories = ref<Category[]>([])
+// 正在拖拽中（防止 liveQuery 回写打断拖拽：例如计数变化触发 categories 刷新）
+const isDraggingCategory = ref(false)
+
+// 同步 liveQuery 数据到本地副本（拖拽中不同步，避免打断）
+watch(
+  () => categories.value,
+  (newCats) => {
+    if (!isDraggingCategory.value) {
+      draggableCategories.value = [...newCats]
+    }
+  },
+  { immediate: true },
+)
+
+// 拖拽开始：标记正在拖拽
+function handleCategoryDragStart() {
+  isDraggingCategory.value = true
+}
+
+// 拖拽结束：根据新顺序持久化到 IndexedDB
+async function handleCategoryDragEnd() {
+  isDraggingCategory.value = false
+  try {
+    const orderUpdates = draggableCategories.value
+      .map((cat, index) => ({ id: cat.id, order: index }))
+      .filter((u): u is { id: number; order: number } => u.id !== undefined)
+    await categoryRepo.updateCategoriesOrder(orderUpdates)
+  } catch (err) {
+    console.error('分类排序失败:', err)
+    toast.error('排序失败，请重试')
+    // 回滚：让下一次 liveQuery 触发重新同步
+    draggableCategories.value = [...categories.value]
+  }
+}
 
 // 选中分类
 function selectCategory(id: string | number) {
@@ -173,22 +213,34 @@ defineExpose({
     <div v-if="!collapsed" class="divider"></div>
     <div v-else class="divider-collapsed"></div>
 
-    <!-- 动态分类 -->
-    <CategoryItem
-      v-for="cat in categories"
-      :key="cat.id"
-      :category="cat"
-      :collapsed="collapsed"
-      :count="getCount(cat.id!)"
-      :active="uiStore.currentView === 'inventory' && uiStore.selectedCategoryId === cat.id"
-      :editing="editingId === cat.id"
-      @select="selectCategory(cat.id!)"
-      @start-edit="startEdit(cat.id!)"
-      @rename="(name: string) => handleRename(cat.id!, name)"
-      @cancel-edit="cancelEdit"
-      @delete="requestDelete(cat.id!, cat.name)"
-      @move-item="handleMoveItem"
-    />
+    <!-- 动态分类（可拖拽排序） -->
+    <VueDraggable
+      v-model="draggableCategories"
+      :animation="200"
+      :disabled="editingId !== null"
+      ghost-class="cat-drag-ghost"
+      chosen-class="cat-drag-chosen"
+      drag-class="cat-drag-dragging"
+      class="categories-draggable"
+      @start="handleCategoryDragStart"
+      @end="handleCategoryDragEnd"
+    >
+      <CategoryItem
+        v-for="cat in draggableCategories"
+        :key="cat.id"
+        :category="cat"
+        :collapsed="collapsed"
+        :count="getCount(cat.id!)"
+        :active="uiStore.currentView === 'inventory' && uiStore.selectedCategoryId === cat.id"
+        :editing="editingId === cat.id"
+        @select="selectCategory(cat.id!)"
+        @start-edit="startEdit(cat.id!)"
+        @rename="(name: string) => handleRename(cat.id!, name)"
+        @cancel-edit="cancelEdit"
+        @delete="requestDelete(cat.id!, cat.name)"
+        @move-item="handleMoveItem"
+      />
+    </VueDraggable>
 
     <!-- 空状态：暂无分类（收起时不显示，空间不足） -->
     <div v-if="!loading && categories.length === 0 && !collapsed" class="empty-categories">
@@ -221,6 +273,40 @@ defineExpose({
   padding: var(--space-3);
   flex: 1;
   overflow-y: auto;
+}
+
+/* 可拖拽分类容器：与父级 nav 对齐，不破坏原有间距 */
+.categories-draggable {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+/* 拖拽视觉反馈（class 由 SortableJS 添加到子元素，需用 :deep 穿透 scoped） */
+/* 占位符：半透明，表示插入位置 */
+:deep(.cat-drag-ghost) {
+  opacity: 0.4;
+  background: rgba(255, 255, 255, 0.08) !important;
+}
+
+/* 被选中的项：抓手光标 */
+:deep(.cat-drag-chosen) {
+  cursor: grabbing;
+}
+
+/* 正在拖拽的项：抬起阴影 + 微缩放，营造悬浮感 */
+:deep(.cat-drag-dragging) {
+  opacity: 0.9;
+  transform: scale(1.02);
+  box-shadow: var(--shadow-xl) !important;
+}
+
+/* 拖拽手柄提示：默认 grab 光标 */
+:deep(.categories-draggable .category-item) {
+  cursor: grab;
+}
+:deep(.categories-draggable .category-item:active) {
+  cursor: grabbing;
 }
 
 /* 固定分类项（全部、未分类） */
