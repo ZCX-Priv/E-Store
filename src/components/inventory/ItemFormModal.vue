@@ -59,7 +59,7 @@ const categoryIdProxy = computed<string>({
 })
 
 // 错误信息
-const errors = ref<{ name?: string; quantity?: string; price?: string }>({})
+const errors = ref<{ name?: string; quantity?: string; price?: string; threshold?: string }>({})
 
 // 模态框根元素引用（用于焦点陷阱）
 const modalRef = ref<HTMLElement | null>(null)
@@ -138,11 +138,24 @@ function validate(): boolean {
   if (!formData.value.name.trim()) {
     errors.value.name = '名称不能为空'
   }
-  if (formData.value.quantity < 0) {
+  // Number.isFinite 不会强转，空字符串/NaN 均返回 false，可拦截清空输入框
+  if (!Number.isFinite(formData.value.quantity)) {
+    errors.value.quantity = '请输入有效数量'
+  } else if (formData.value.quantity < 0) {
     errors.value.quantity = '数量不能为负'
   }
-  if (formData.value.price < 0) {
+  if (!Number.isFinite(formData.value.price)) {
+    errors.value.price = '请输入有效价格'
+  } else if (formData.value.price < 0) {
     errors.value.price = '价格不能为负'
+  }
+  // 仅在开启预警时校验阈值
+  if (formData.value.lowStockAlertEnabled) {
+    if (!Number.isFinite(formData.value.lowStockThreshold)) {
+      errors.value.threshold = '请输入有效阈值'
+    } else if (formData.value.lowStockThreshold < 0) {
+      errors.value.threshold = '阈值不能为负'
+    }
   }
   return Object.keys(errors.value).length === 0
 }
@@ -324,9 +337,11 @@ onUnmounted(() => {
                   type="number"
                   min="0"
                   class="field-input threshold-input"
+                  :class="{ error: errors.threshold }"
                 />
                 <span class="threshold-unit">个单位</span>
               </div>
+              <span v-if="errors.threshold" class="field-error">{{ errors.threshold }}</span>
             </div>
 
             <!-- 描述 -->

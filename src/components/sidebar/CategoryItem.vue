@@ -27,6 +27,8 @@ const emit = defineEmits<{
 const editName = ref('')
 // 输入框引用
 const inputRef = ref<HTMLInputElement | null>(null)
+// 一次编辑会话是否已结束：兜底 blur 与 click/esc 的竞争，避免重复提交
+const finishing = ref(false)
 
 // 三点菜单展开状态
 const menuOpen = ref(false)
@@ -60,6 +62,8 @@ function menuDelete() {
 // 当父组件设置 editingId 时，对应 item 的 editing 变 true，此处响应
 watch(() => props.editing, async (isEditing) => {
   if (isEditing) {
+    // 进入编辑会话时重置结束标志
+    finishing.value = false
     editName.value = props.category.name
     await nextTick()
     inputRef.value?.focus()
@@ -72,14 +76,23 @@ function startEdit() {
   emit('start-edit')
 }
 
-// 保存编辑
+// 保存编辑（finishing 兜底：一次会话只结束一次，避免 blur 与 click 重复触发）
 function save() {
+  if (finishing.value) return
+  finishing.value = true
   const name = editName.value.trim()
   if (name && name !== props.category.name) {
     emit('rename', name)
   } else {
     emit('cancel-edit')
   }
+}
+
+// 取消编辑（同样受 finishing 保护，确保 Esc / 取消按钮真正取消而不被 blur 抢先保存）
+function requestCancel() {
+  if (finishing.value) return
+  finishing.value = true
+  emit('cancel-edit')
 }
 
 // ===== 跨分类拖拽放置目标 =====
@@ -125,13 +138,13 @@ function onDrop(e: DragEvent) {
         v-model="editName"
         class="edit-input"
         @keyup.enter="save"
-        @keyup.esc="emit('cancel-edit')"
+        @keyup.esc="requestCancel"
         @blur="save"
       />
-      <button class="edit-btn confirm" @click="save" aria-label="确认">
+      <button class="edit-btn confirm" @mousedown.prevent @click="save" aria-label="确认">
         <Check :size="14" />
       </button>
-      <button class="edit-btn cancel" @click="emit('cancel-edit')" aria-label="取消">
+      <button class="edit-btn cancel" @mousedown.prevent @click="requestCancel" aria-label="取消">
         <X :size="14" />
       </button>
     </div>

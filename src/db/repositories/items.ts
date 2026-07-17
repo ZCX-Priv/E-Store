@@ -83,19 +83,6 @@ export async function updateItemsOrder(items: { id: number; order: number }[]): 
   })
 }
 
-// 快速调整数量（事务内读取当前值再加 delta，更新 updatedAt，保证原子性）
-export async function adjustItemQuantity(id: number, delta: number): Promise<void> {
-  await db.transaction('rw', db.items, async () => {
-    const item = await db.items.get(id)
-    if (item) {
-      await db.items.update(id, {
-        quantity: item.quantity + delta,
-        updatedAt: Date.now(),
-      })
-    }
-  })
-}
-
 // 设置数量
 export async function setItemQuantity(id: number, quantity: number): Promise<void> {
   await db.items.update(id, {
@@ -115,13 +102,4 @@ export async function moveItemToCategory(
     order: newOrder,
     updatedAt: Date.now(),
   })
-}
-
-// 获取总价值（数量 × 价格 的累加）
-export async function getTotalValue(): Promise<number> {
-  let total = 0
-  await db.items.each(item => {
-    total += item.quantity * item.price
-  })
-  return total
 }

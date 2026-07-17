@@ -62,26 +62,3 @@ export function useItems() {
 
   return { items, loading }
 }
-
-// 响应式获取全部库存项（无过滤）
-export function useAllItems() {
-  const items = ref<Item[]>([])
-  const loading = ref(true)
-
-  const subscription = from(
-    liveQuery(() => itemRepo.getAllItems())
-  ).subscribe({
-    next: (result) => {
-      items.value = result
-      loading.value = false
-    },
-    error: (err) => {
-      console.error('加载库存项失败:', err)
-      loading.value = false
-    },
-  })
-
-  onScopeDispose(() => subscription.unsubscribe())
-
-  return { items, loading }
-}

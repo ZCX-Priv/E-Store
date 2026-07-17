@@ -91,9 +91,6 @@ export async function parseExcelFile(
     if (cat.id) categoryMap.set(cat.name, cat.id)
   }
 
-  // 获取「未分类」分类 id 作为回退
-  const uncategorizedId = categories.find((c) => c.name === '未分类')?.id
-
   // 逐行解析
   const parsedItems: ImportPreview['items'] = []
   const conflictItems: ImportPreview['conflictItems'] = []
@@ -104,7 +101,8 @@ export async function parseExcelFile(
     if (!name) continue
 
     const categoryName = String(row[EXCEL_COLUMNS.category] ?? '未分类').trim()
-    const categoryId = categoryMap.get(categoryName) || uncategorizedId || 0
+    // 命中现有分类则用其 id；未知/未分类一律归为「未分类」(categoryId = undefined)
+    const categoryId = categoryMap.get(categoryName)
 
     const item = {
       name,

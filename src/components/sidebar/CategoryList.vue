@@ -134,6 +134,8 @@ async function handleMoveItem(itemId: number, categoryId: number) {
     ? Math.max(...itemsInTarget.map((i) => i.order))
     : -1
   await itemRepo.moveItemToCategory(itemId, categoryId, maxOrder + 1)
+  // 标记该项刚被跨分类移动，避免 InventoryView 的拖拽重排序回写覆盖新 order
+  uiStore.markItemMoved(itemId)
 }
 
 // 暴露 handleAddCategory 供父组件 Sidebar 调用

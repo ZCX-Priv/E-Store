@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 库存项行（列表视图）
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { Minus, Plus, Pencil, Trash2, Package } from 'lucide-vue-next'
 import type { Item } from '@/db'
 import { itemRepo } from '@/db'
@@ -15,19 +15,33 @@ const emit = defineEmits<{
 }>()
 
 const localQuantity = ref(props.item.quantity)
-watch(() => props.item.quantity, (v) => { localQuantity.value = v })
+// 是否有未落库的本地改动：防止 liveQuery 回写覆盖交互中的本地值
+const dirty = ref(false)
+watch(() => props.item.quantity, (v) => {
+  if (!dirty.value) {
+    localQuantity.value = v
+  } else if (v === localQuantity.value) {
+    dirty.value = false
+  }
+})
 
 let timer: ReturnType<typeof setTimeout> | null = null
 
 async function adjustQuantity(delta: number) {
   localQuantity.value = Math.max(0, localQuantity.value + delta)
+  dirty.value = true
   if (timer) clearTimeout(timer)
   timer = setTimeout(async () => {
     if (props.item.id) {
-      await itemRepo.adjustItemQuantity(props.item.id, localQuantity.value - props.item.quantity)
+      await itemRepo.setItemQuantity(props.item.id, localQuantity.value)
     }
   }, 300)
 }
+
+// 卸载时清理未触发的防抖定时器
+onUnmounted(() => {
+  if (timer) clearTimeout(timer)
+})
 
 // 是否低库存：按该项自身的预警开关与阈值判定
 const isLowStock = () =>

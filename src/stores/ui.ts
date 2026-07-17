@@ -50,6 +50,10 @@ export const useUiStore = defineStore('ui', () => {
   const itemFormOpen = ref(false)
   const editingItem = ref<Item | null>(null)
 
+  // 最近一次「跨分类拖拽移动」的库存项 id
+  // 用于让 InventoryView.handleDragEnd 跳过对该项的重排序写入，避免与移动写入并发冲突
+  const recentMovedItemId = ref<number | null>(null)
+
   // 设置视图模式并持久化
   function setViewMode(mode: ViewMode) {
     viewMode.value = mode
@@ -106,6 +110,16 @@ export const useUiStore = defineStore('ui', () => {
     itemFormOpen.value = false
   }
 
+  // 标记某库存项刚被跨分类移动（供拖拽重排序逻辑规避并发写入）
+  function markItemMoved(id: number) {
+    recentMovedItemId.value = id
+  }
+
+  // 清除跨分类移动标记
+  function clearMovedItem() {
+    recentMovedItemId.value = null
+  }
+
   return {
     viewMode,
     sidebarCollapsed,
@@ -115,6 +129,7 @@ export const useUiStore = defineStore('ui', () => {
     theme,
     itemFormOpen,
     editingItem,
+    recentMovedItemId,
     setViewMode,
     toggleSidebar,
     setSidebarCollapsed,
@@ -125,5 +140,7 @@ export const useUiStore = defineStore('ui', () => {
     setTheme,
     openItemForm,
     closeItemForm,
+    markItemMoved,
+    clearMovedItem,
   }
 })

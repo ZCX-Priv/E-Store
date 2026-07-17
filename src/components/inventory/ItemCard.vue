@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // 库存项卡片（网格视图）
-import { ref, watch } from 'vue'
+import { ref, watch, onUnmounted } from 'vue'
 import { Minus, Plus, Pencil, Trash2, Package } from 'lucide-vue-next'
 import type { Item } from '@/db'
 import { itemRepo } from '@/db'
@@ -17,9 +17,16 @@ const emit = defineEmits<{
 // 本地数量（即时反馈）
 const localQuantity = ref(props.item.quantity)
 
-// 监听 props 变化同步
+// 是否有未落库的本地改动：防止 liveQuery 回写在交互中途覆盖本地值（导致快速点击丢失）
+const dirty = ref(false)
+
+// 监听 props 变化同步：仅在无未落库改动时同步；DB 追平本地值后解除保护
 watch(() => props.item.quantity, (newVal) => {
-  localQuantity.value = newVal
+  if (!dirty.value) {
+    localQuantity.value = newVal
+  } else if (newVal === localQuantity.value) {
+    dirty.value = false
+  }
 })
 
 // 数量变化高亮
@@ -29,20 +36,26 @@ const pulse = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 
 async function adjustQuantity(delta: number) {
-  // 即时更新本地值
+  // 即时更新本地值并标记为脏
   localQuantity.value = Math.max(0, localQuantity.value + delta)
+  dirty.value = true
   // 高亮动画
   pulse.value = true
   setTimeout(() => { pulse.value = false }, 600)
 
-  // 防抖写库（300ms）
+  // 防抖写库（300ms）：写入绝对值，避免基于过期 props 的 delta 叠加
   if (debounceTimer) clearTimeout(debounceTimer)
   debounceTimer = setTimeout(async () => {
     if (props.item.id) {
-      await itemRepo.adjustItemQuantity(props.item.id, localQuantity.value - props.item.quantity)
+      await itemRepo.setItemQuantity(props.item.id, localQuantity.value)
     }
   }, 300)
 }
+
+// 卸载时清理未触发的防抖定时器
+onUnmounted(() => {
+  if (debounceTimer) clearTimeout(debounceTimer)
+})
 
 // 是否低库存：按该项自身的预警开关与阈值判定
 const isLowStock = () =>

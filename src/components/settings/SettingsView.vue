@@ -82,13 +82,17 @@ async function confirmImport() {
   importing.value = true
   try {
     const now = Date.now()
-    // 补全 order/createdAt/updatedAt 字段
-    const itemsToAdd = importPreview.value.items.map((item, index) => ({
+    // 原始解析项（仅字段，不含 order/createdAt/updatedAt）
+    const rawItems = importPreview.value.items
+    // 新增项的起始 order：现有最大 order + 1，避免与既有项撞位
+    const baseOrder = allItems.value.reduce((m, i) => Math.max(m, i.order), -1) + 1
+    // 把原始解析项装配为「新增」用的完整 Item（补 order/createdAt/updatedAt）
+    const decorateNew = (item: ImportPreview['items'][number], offset: number): Omit<Item, 'id'> => ({
       ...item,
-      order: index,
+      order: baseOrder + offset,
       createdAt: now,
       updatedAt: now,
-    }))
+    })
 
     // 实际写入（新增+覆盖）条数，用于反馈提示
     let importedCount = 0
@@ -96,15 +100,15 @@ async function confirmImport() {
     if (importMode.value === 'overwrite' && importPreview.value.conflicts > 0) {
       // 覆盖模式：更新同名项，添加新项
       const toUpdate: Item[] = []
-      const toAdd: typeof itemsToAdd = []
+      const toAdd: Omit<Item, 'id'>[] = []
 
-      for (const item of itemsToAdd) {
+      for (const item of rawItems) {
         const existing = allItems.value.find((i) => i.name === item.name)
         if (existing && existing.id) {
-          // 保留原 id，覆盖其他字段
-          toUpdate.push({ ...existing, ...item, id: existing.id })
+          // 覆盖字段，但保留既有 id / order / createdAt
+          toUpdate.push({ ...existing, ...item, id: existing.id, updatedAt: now })
         } else {
-          toAdd.push(item)
+          toAdd.push(decorateNew(item, toAdd.length))
         }
       }
 
@@ -117,9 +121,9 @@ async function confirmImport() {
       importedCount = toUpdate.length + toAdd.length
     } else {
       // 跳过模式：仅添加非冲突项
-      const toAdd = itemsToAdd.filter(
-        (item) => !importPreview.value!.conflictItems.some((c) => c.name === item.name)
-      )
+      const toAdd = rawItems
+        .filter((item) => !importPreview.value!.conflictItems.some((c) => c.name === item.name))
+        .map((item, i) => decorateNew(item, i))
       if (toAdd.length > 0) {
         await itemRepo.bulkAddItems(toAdd)
       }

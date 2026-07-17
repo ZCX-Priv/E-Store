@@ -45,18 +45,6 @@ export async function deleteCategory(id: number): Promise<void> {
   })
 }
 
-// 批量更新排序
-export async function updateCategoryOrder(categories: Category[]): Promise<void> {
-  await db.transaction('rw', db.categories, async () => {
-    await db.categories.bulkPut(categories)
-  })
-}
-
-// 获取分类下的库存项数量（走 categoryId 索引）
-export async function getItemCountByCategory(categoryId: number): Promise<number> {
-  return db.items.where('categoryId').equals(categoryId).count()
-}
-
 // 迁移历史数据：将名为「未分类」的实际分类记录移除，其下库存项变为无分类（categoryId = undefined）
 // 此函数在应用启动时调用，幂等（无「未分类」分类时直接返回）
 export async function migrateUncategorizedCategory(): Promise<void> {
