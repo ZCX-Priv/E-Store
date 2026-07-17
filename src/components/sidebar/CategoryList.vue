@@ -169,12 +169,15 @@ function getTotalCount(): number {
 // 跨分类移动库存项：拖拽到目标分类后，计算新 order（目标分类最大 order + 1）并写库
 // liveQuery 会自动刷新当前视图与分类计数
 async function handleMoveItem(itemId: number, categoryId: number) {
+  // 同步标记该项刚被跨分类移动（必须在任何 await 之前）：
+  // drop 事件先于 dragend 触发，emit 为同步调用，此处能保证在 InventoryView 的
+  // handleDragEnd 同步读取 recentMovedItemId 之前完成标记，从而正确排除该项，
+  // 避免其新 order 被旧视图的重排序覆盖
+  uiStore.markItemMoved(itemId)
   const itemsInTarget = await itemRepo.getItemsByCategory(categoryId)
   // reduce 求最大，避免 Math.max(...大数组) 栈溢出
   const maxOrder = itemsInTarget.reduce((m, i) => Math.max(m, i.order), -1)
   await itemRepo.moveItemToCategory(itemId, categoryId, maxOrder + 1)
-  // 标记该项刚被跨分类移动，避免 InventoryView 的拖拽重排序回写覆盖新 order
-  uiStore.markItemMoved(itemId)
 }
 
 // 暴露 handleAddCategory 供父组件 Sidebar 调用

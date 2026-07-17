@@ -44,8 +44,9 @@ onUnmounted(() => {
 })
 
 // 是否低库存：按该项自身的预警开关与阈值判定
+// 用 localQuantity（即时显示值）而非 props.item.quantity，使徽标与显示数量同步
 const isLowStock = () =>
-  props.item.lowStockAlertEnabled && props.item.quantity <= props.item.lowStockThreshold
+  props.item.lowStockAlertEnabled && localQuantity.value <= props.item.lowStockThreshold
 
 // 拖拽开始：写入 item id 到 dataTransfer，供侧边栏分类项接收（跨分类移动）
 // 与 vue-draggable-plus 的同分类排序共存，详见 ItemCard 中同样注释

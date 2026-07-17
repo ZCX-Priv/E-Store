@@ -117,9 +117,9 @@ export async function parseExcelFile(
     const item = {
       name,
       categoryId,
-      quantity: Number(row[EXCEL_COLUMNS.quantity] ?? 0) || 0,
+      quantity: Math.max(0, Number(row[EXCEL_COLUMNS.quantity] ?? 0) || 0),
       unit: String(row[EXCEL_COLUMNS.unit] ?? '个').trim(),
-      price: Number(row[EXCEL_COLUMNS.price] ?? 0) || 0,
+      price: Math.max(0, Number(row[EXCEL_COLUMNS.price] ?? 0) || 0),
       description: String(row[EXCEL_COLUMNS.description] ?? '').trim(),
       // 旧格式 Excel 无阈值列，填默认值：开启预警 + 阈值 10
       lowStockAlertEnabled: true,

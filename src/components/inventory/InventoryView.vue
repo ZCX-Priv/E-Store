@@ -78,11 +78,20 @@ async function handleDragEnd() {
   // 若本次拖拽是「跨分类移动」（拖到侧边栏分类），移动逻辑已设置新 order，
   // 这里需排除该项，避免并发写入把它的 order 覆盖回旧视图的位置
   const movedId = uiStore.recentMovedItemId
-  const orderUpdates = draggableItems.value
-    .map((item, index) => ({ id: item.id, order: index }))
-    .filter((u): u is { id: number; order: number } => u.id !== undefined && u.id !== movedId)
-  await itemRepo.updateItemsOrder(orderUpdates)
-  uiStore.clearMovedItem()
+  try {
+    const orderUpdates = draggableItems.value
+      .map((item, index) => ({ id: item.id, order: index }))
+      .filter((u): u is { id: number; order: number } => u.id !== undefined && u.id !== movedId)
+    await itemRepo.updateItemsOrder(orderUpdates)
+  } catch (err) {
+    console.error('排序失败:', err)
+    toast.error('排序失败，请重试')
+    // 回滚：让下一次 liveQuery 触发重新同步
+    draggableItems.value = [...items.value]
+  } finally {
+    // 无论成败都清除标记，避免残留影响后续拖拽
+    uiStore.clearMovedItem()
+  }
 }
 
 // ========== 虚拟滚动（列表视图，超过 100 条时启用） ==========

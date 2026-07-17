@@ -29,7 +29,9 @@ async function handleExport() {
     // 导出前重新获取最新数据
     allItems.value = await itemRepo.getAllItems()
     allCategories.value = await categoryRepo.getAllCategories()
-    exportItemsToExcel(allItems.value, allCategories.value)
+    // 必须 await：exportItemsToExcel 为异步（动态 import xlsx + writeFile），
+    // 不 await 会导致其失败逃出 catch（未处理的 rejection）且仍误报「已导出」
+    await exportItemsToExcel(allItems.value, allCategories.value)
     toast.success(`已导出 ${allItems.value.length} 项`)
   } catch (err) {
     console.error('导出失败:', err)
